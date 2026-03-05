@@ -5,6 +5,7 @@ const { mailtrapEmailSend } = require("../lib/email");
 
 
 
+
 const createCollege = async (req, res) => {
     const {college_name, college_logo, established_year, email, password } = req.body;
         // Hnadle all try catch in service layer
@@ -16,6 +17,8 @@ const createCollege = async (req, res) => {
 
         const token = collegeRegistration(result.college_id, result.email, 'college');
         const url = `${process.env.BASE_URL}/api/college/verify?token=${token}`;
+
+        
         
         const response = await mailtrapEmailSend(email, url, 'register')
         if(!response){
@@ -29,7 +32,7 @@ const createCollege = async (req, res) => {
         return res.status(201).json(successResponse);
 }
 
-const getCollegeDetails = async (req, res) => {  // After email verification
+const verifyEmail = async (req, res) => {  // On email verification
     const { token } = req.query;
     if(!token) {
         errorResponse.message = "Token is required";
@@ -102,6 +105,10 @@ const getCollegeDetails = async (req, res) => {  // After email verification
     }
 
 }
+
+
+
+
 
 module.exports = {
     createCollege

@@ -1,31 +1,36 @@
-// Semester basis subject_class versioning
-const subject_class = `CREATE TABLE class_subjects (
-    class_subject_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+// // Semester basis subject_class versioning
+// const subject_class = `CREATE TABLE class_subjects (
+//     class_subject_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    class_id UUID REFERENCES classes(class_id) ON DELETE CASCADE,
-    subject_id UUID REFERENCES subjects(subject_id),
-    teacher_id UUID REFERENCES teachers(teacher_id),
+//     class_id UUID REFERENCES classes(class_id) ON DELETE CASCADE,
+//     subject_id UUID REFERENCES subjects(subject_id),
+//     teacher_id UUID REFERENCES teachers(teacher_id),
 
-    UNIQUE (class_id, subject_id)
-);`
+//     UNIQUE (class_id, subject_id)
+// );`
 
-// It will be added by the college
-const time_slots = `CREATE TABLE time_slots (
-    time_slot_id SERIAL PRIMARY KEY,
+// // It will be added by the college
+// const time_slots = `CREATE TABLE time_slots (
+//     time_slot_id SERIAL PRIMARY KEY,
 
-    college_id UUID REFERENCES colleges(college_id) ON DELETE CASCADE,
+//     college_id UUID REFERENCES colleges(college_id) ON DELETE CASCADE,
 
-    period_number INT NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
+//     period_number INT NOT NULL,
+//     start_time TIME NOT NULL,
+//     end_time TIME NOT NULL,
 
-    UNIQUE (college_id, period_number)
-);`
+//     UNIQUE (college_id, period_number)
+// );`
+// day_of_week
+// // Already made earlier
+// const days = `CREATE TYPE day_of_week AS ENUM (
+//     'Monday', 'Tuesday', 'Wednesday',
+//     'Thursday', 'Friday', 'Saturday', 'Sunday'
+// );`
 
-const days = `CREATE TYPE day_of_week AS ENUM (
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-);`
 
+
+// Query left
 // Now in a new semester timetable is changed so we should make timetable versioning
 const timetable_versioning = `CREATE TABLE timetable_versions (
     version_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
