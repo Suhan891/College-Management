@@ -42,7 +42,7 @@ const login = async (req, res) => {
 
             refreshData = {sub: result.creator, college: result.colleg_id, tokenVersion: result.tokenVersion}
 
-            accessData = {college_id: result.college_id, role, creator: result.creator} // access token 
+            accessData = {college_id: result.college_id, role, userId: result.creator} // access token 
 
             data = {...result, creator_name: name, role}
 

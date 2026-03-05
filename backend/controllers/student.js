@@ -29,6 +29,7 @@ const createStudent = async (req, res) => {
       current_roll: classRoll,
       class_id: classId,
       student_id: user.user_id,
+      stream_id: studentData.streamId
     });
     if (err2) {
       errorResponse.error = err2;

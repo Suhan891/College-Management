@@ -58,7 +58,7 @@ const findCollege = async (userId) => {
     try {
         const result = await dbQuery(query, value)
         if(result.rows.length === 0) {
-            errorResponse.message = "No such Student Available"
+            errorResponse.message = "No such College Available"
             return {result: null, err: errorResponse, status: status.NOT_FOUND};
         }
         return { result: result.rows[0], err: null, status: null }

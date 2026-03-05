@@ -14,6 +14,7 @@
 //     current_semester INT,
 //     current_roll VARCHAR(5),
 
+//     stream_id INT REFERENCES streams(stream_id) NOT NULL,
 //     class_id INT REFERENCES class(class_id) NOT NULL,
 
 //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

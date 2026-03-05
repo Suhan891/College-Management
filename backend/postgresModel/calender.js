@@ -1,4 +1,4 @@
-// // Required to think more on this portion
+
 
 // const days = `CREATE TYPE day_of_week AS ENUM (
 //     'Monday', 'Tuesday', 'Wednesday',

@@ -10,7 +10,8 @@ const validateStudentCreation = Joi.object({
     currentYear: Joi.number().integer().positive().max(10).required(),
     currentSemester: Joi.number().integer().positive().max(10).required(),
     classRoll: Joi.number().integer().positive().max(1000).required(),
-    classId: Joi.string().uuid().required()
+    classId: Joi.string().uuid().required(),
+    streamId: Joi.string().uuid().required()
 })
 
 const validateStudentRegistration = Joi.object({

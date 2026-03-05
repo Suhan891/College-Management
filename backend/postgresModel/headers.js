@@ -43,18 +43,29 @@
 
 // // Year based class versioning
 
-// const classes = `CREATE TABLE classes (
-//     class_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+// const classVersioning = `CREATE TABLE class_versioning ( --> Not REQUIRED as class will remain always fixed 
+// //     class_version_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+// //     college_id UUID NOT NULL REFERENCES colleges(college_id) ON DELETE SET NULL, 
+// //
+// //     effective_from DATE NOT NULL,
+// //     effective_to DATE NOT NULL,
+// //     is_active BOOLEAN DEFAULT TRUE,
+
+// //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP        
+// )`
+const classes = `CREATE TABLE classes (
+    class_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
-//     stream_id UUID REFERENCES stream(stream_id) ON DELETE CASCADE,
+    stream_id UUID REFERENCES stream(stream_id) ON DELETE SET NULL,
+    version_id UUID NOT NULL REFERENCES class_versioning(class_version_id) ON DELETE CASCADE,
 
-//     class_name VARCHAR(255) NOT NULL,
-//     class_teacher UUID REFERENCES teacher(teacher_id),
-//     academic_year INT NOT NULL, --may be eremoved
+    class_name VARCHAR(20) NOT NULL,
+    class_teacher UUID REFERENCES teacher(teacher_id),
+    academic_year INT NOT NULL, --may be eremoved
 
-//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-//     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-// );`
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
 
 // // To link a specific department(Mathematics) with subject like (Calculus, Probability,...) for making timetable handle better 
 // const subject = `CREATE TABLE subjects (

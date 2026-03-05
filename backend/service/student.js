@@ -24,10 +24,10 @@ const existingUser = async (email) => {
     }
 }
 const createStudent = async ({ college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, student_id}) => {
-    const query = `INSERT INTO students (college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, student_id)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    const query = `INSERT INTO students (college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, stream_id, student_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                     RETURNING student_id;`
-    const values = [college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, student_id]
+    const values = [college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id,stream_id, student_id]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
