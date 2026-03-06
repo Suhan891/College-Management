@@ -3,27 +3,6 @@ const { errorResponse } = require("../utils/response")
 const classValidations = require("../validations/class")
 const classService = require("../service/class")
 
-// const validateClassVersioning = (req, res, next) => {
-//     const {collegeId} = req.collegeId
-//     const {value, error} = classService.versioningClass.validate(req.body)
-//     if(error) {
-//         errorResponse.message = error.message
-//         return res.status(status.BAD_REQUEST).json(errorResponse)
-//     }
-
-//     const {result, err} = classService.ClassVersionAlreadyExists({college_id: collegeId, effective_from: value.effectiveFrom, effective_to: value.effectiveTo})
-//     if(err){
-//         errorResponse.error = err
-//         return res(status.SERVER_ERROR).json(errorResponse)
-//     }
-//     if(result){
-//         errorResponse.message = "Class Version already exists"
-//         return res(status.BAD_REQUEST).json(errorResponse)
-//     }
-
-//     req.classVersionData = value
-//     next()
-// }
 
 const validateClassCreation = (req, res, next) => {
     const collegeId = req.collegeId
@@ -43,20 +22,12 @@ const validateClassCreation = (req, res, next) => {
         return res(status.BAD_REQUEST).json(errorResponse)
     }
 
-    // const {result: isExistingClassVersion, err: classVersionError} = classService.validClassVersion({version_id: value.versioId, college_id: collegeId})
-    // if(classVersionError){
-    //     errorResponse.error = classVersionError
-    //     return res(status.SERVER_ERROR).json(errorResponse)
-    // }
-    // if(!isExistingClassVersion){
-    //     errorResponse.message = "No such class version exists"
-    //     return res(status.NOT_FOUND).json(errorResponse)
-    // }
-    const {result: stream, err: streamError, status: stat} = departmentService.validStreamExists({stream_id: value.streamId})
+    // This two has to be again created
+    const {result: stream, err: streamError, status: stat} = classService.validStreamExists({stream_id: value.streamId})
     if(streamError)
         return res.status(stat).json(streamError)
     
-    const {result: isExistingCourse, err: courseError} = departmentService.validCourseExists({course_id: stream.course_id, college_id: collegeId})
+    const {result: isExistingCourse, err: courseError} = classService.validCourseExists({course_id: stream.course_id, college_id: collegeId})
     if(courseError){
         errorResponse.error = courseError
         return res(status.SERVER_ERROR).json(errorResponse)
@@ -65,6 +36,18 @@ const validateClassCreation = (req, res, next) => {
         errorResponse.message = "No such course exists"
         return res(status.NOT_FOUND).json(errorResponse)
     }
+
+    const {err: adressErr, result: adress} = classService.getCollegeFromAdress({adress_id: value.adressId})
+    if(adressErr) {
+        errorResponse.error = adressErr
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
+
+    if(adress.college_id !== collegeId) {
+        errorResponse.message = "No such Adress Exists for your College"
+        return res(status.NOT_FOUND).json(errorResponse)
+    }
+
 
     req.classData = value
     next()

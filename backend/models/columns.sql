@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS streams (
 
     stream_name VARCHAR(255) NOT NULL,
     stream_code VARCHAR(10) NOT NULL,
-    -- hod UUID REFERENCES teacherS(teacher_id),
+    hod UUID REFERENCES teachers(teacher_id),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS departments (
 
     department_name VARCHAR(255) NOT NULL,
     department_code VARCHAR(10) NOT NULL,
-    -- hod UUID REFERENCES teacher(teacher_id),
+    hod UUID REFERENCES teacher(teacher_id),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -130,7 +130,9 @@ CREATE TABLE classes (
     stream_id UUID REFERENCES streams(stream_id) ON DELETE SET NULL,
 
     class_name VARCHAR(20) NOT NULL,
-    -- class_teacher UUID REFERENCES teacher(teacher_id),
+    class_teacher UUID REFERENCES teacher(teacher_id),
+
+    address_id UUID REFERENCES address(address_id) ON DELETE SET NULL;
     academic_year INT NOT NULL, -- may be removed
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -211,9 +213,7 @@ CREATE TABLE timetable_versions (
 
     effective_from DATE NOT NULL,
     effective_to DATE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-
-    address_id UUID REFERENCES address(address_id) ON DELETE SET NULL, -- college will confirm the address for this timetable creation
+    is_active BOOLEAN DEFAULT TRUE, -- This will be made in update route
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

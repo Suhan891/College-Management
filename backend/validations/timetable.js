@@ -11,9 +11,7 @@ const registerTimeSlot = Joi.object({
 const registeringTimetbleVersioning = Joi.object({
     streamId: Joi.string().uuid().required(),
     effectiveFrom: Joi.string().required(),
-    effectiveTo: Joi.string().required(),
-    
-    adressId: Joi.string().uuid().required()  // Based on the college will confirm the adress for this timetable
+    effectiveTo: Joi.string().required()
 })
 const registerTimetable = Joi.object({
     versionId: Joi.string().uuid().required(),

@@ -10,7 +10,8 @@ const createClass = async (req, res) => {
             stream_id: classData.streamId,
              class_name: classData.className,
               class_teacher: classData.classTeacher,
-               academic_year: classData.academicYear
+               academic_year: classData.academicYear,
+                adress_id: classData.adressId
             })
         if(err){
             errorResponse.error = err
