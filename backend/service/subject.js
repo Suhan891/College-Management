@@ -29,6 +29,18 @@ const getCollegeId = async ({department_id}) => {  // For subject
         return {result: null, err: error}
     }
 }
+const createSubject = async ({department_id, subject_name}) => {
+    const query = `INSERT INTO subjects(department_id, subject_name)
+                    VALUES ($1, $2, $3)
+                    RETURNING subject_id`
+    const values = [department_id, subject_name]
+    try {
+        const result = await dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
 
 
 // Subject Class Table
@@ -101,6 +113,7 @@ const createSubjectClass = async ({class_id, subject_id, teacher_id}) => {
 module.exports = {
     existingSubject,
     getCollegeId,
+    createSubject,
 
     existingSubjectClass,
     getDepartmentFromSubject,

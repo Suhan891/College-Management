@@ -6,14 +6,14 @@ const createStream = async (req, res) => {
     const streamData = req.streamData
 
     try {
-        const {error, result} = await streamService.createStream({
+        const {err, result} = await streamService.createStream({
             course_id: streamData.courseId,
              stream_name: streamData.streamName,
               stream_code: streamData.streamCode,
                hod: streamData.hod
             })
-        if(error){
-            errorResponse.error = error
+        if(err){
+            errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 

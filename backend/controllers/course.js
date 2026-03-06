@@ -8,15 +8,15 @@ const createCourse = async (req, res) => {
     const courseData = req.courseData
 
     try {
-        const {error, result} = await courseService.createCourse({
+        const {err, result} = await courseService.createCourse({
             course_name: courseData.course_name,
              course_code: courseData.course_code, 
              duration_years: courseData.duration_years, 
              total_semesters: courseData.total_semesters, 
              college_id: collegeId
             })
-        if(error){
-            errorResponse.message = "Course creation Failed"
+        if(err){
+            errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 

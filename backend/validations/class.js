@@ -1,9 +1,9 @@
 const Joi = require("joi");
 
-const versioningClass = Joi.object({
-    effectiveFrom: Joi.date().required(),
-    effectiveTo:Joi.date().required()
-})
+// const versioningClass = Joi.object({
+//     effectiveFrom: Joi.date().required(),
+//     effectiveTo:Joi.date().required()
+// })
 
 const registerClass = Joi.object({
     className: Joi.string().required(),

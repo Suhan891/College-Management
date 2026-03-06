@@ -96,11 +96,11 @@ const validCourseExists = async ({ course_id, college_id}) => {
 //     }
 // }
 
-const createClass = async ({stream_id, version_id, class_name, class_teacher, academic_year}) => {
-    const query = `INSERT INTO classes (stream_id, version_id, class_name, class_teacher, academic_year)
-                    VALUES ($1, $2, $3, $4, $5)
+const createClass = async ({stream_id, class_name, class_teacher, academic_year}) => {
+    const query = `INSERT INTO classes (stream_id, class_name, class_teacher, academic_year)
+                    VALUES ($1, $2, $3, $4)
                     RETURNING class_id;`
-    const values = [stream_id, version_id, class_name, class_teacher, academic_year]
+    const values = [stream_id, class_name, class_teacher, academic_year]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}

@@ -1,26 +1,26 @@
-const streamService = require('../service/stream')
+const classService = require('../service/class')
 const { status } = require('../utils/constants')
 const { errorResponse } = require('../utils/response')
 
 const createClass = async (req, res) => {
-    const streamData = req.streamData
+    const classData = req.classData
 
     try {
-        const {error, result} = await streamService.createStream({
-            course_id: streamData.courseId,
-             stream_name: streamData.streamName,
-              stream_code: streamData.streamCode,
-               hod: streamData.hod
+        const {err, result} = await classService.createClass({
+            stream_id: classData.streamId,
+             class_name: classData.className,
+              class_teacher: classData.classTeacher,
+               academic_year: classData.academicYear
             })
-        if(error){
-            errorResponse.error = error
+        if(err){
+            errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 
-        const streamId = result.stream_id
+        const classId = result.class_id
         
-        successResponse.message = "New Stream Created"
-        successResponse.data = { streamId, ...result}
+        successResponse.message = "New Class Created"
+        successResponse.data = { classId, ...result}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
@@ -30,5 +30,5 @@ const createClass = async (req, res) => {
 }
 
 module.exports = {
-    createStream
+    createClass
 }

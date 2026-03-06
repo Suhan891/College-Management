@@ -81,6 +81,7 @@ const validateCreateSubjectClass = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
+    req.subjectClassData = value
     next()
 }
 

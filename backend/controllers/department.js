@@ -6,14 +6,14 @@ const createDepartment = async (req, res) => {
     const departmentData = req.departmentData
 
     try {
-        const {error, result} = await departmentService.createDepartment({
+        const {err, result} = await departmentService.createDepartment({
             stream_id: departmentData.streamId,
              department_name: departmentData.departmentName,
               department_code: departmentData.departmentCode,
                hod: departmentData.hod
             })
-        if(error){
-            errorResponse.message = "Department creation Failed"
+        if(err){
+            errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 
