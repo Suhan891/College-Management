@@ -164,8 +164,9 @@ const logout = (req, res) => {
 const emailVerificationRoles = async (req, res) => {
     const userData = req.userData
     try {
+        const hashedPassword = createPassword(userData.password)
         const emailVerified = true
-        const {result: emailDone, err} = createPassword({password: userData.password, isEmailVerified: emailVerified, date_of_birth: userData.dob})
+        const {result: emailDone, err} = createPassword({password: hashedPassword, isEmailVerified: emailVerified, date_of_birth: userData.dob})
         if(err) {
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)

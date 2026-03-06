@@ -70,18 +70,7 @@ const getCollegeFromStream = ({stream_id}) => {
         return {result: null, err: null}
     }
 }
-// const getCollegeFromAdress = ({adress_id}) => {
-//     const query = `SELECT college_id
-//                     FROM adress
-//                     WHERE adress_id = $1`
-//     const value = [adress_id]
-//     try {
-//         const result = dbQuery(query, value)
-//         return {result, err: null}
-//     } catch (error) {
-//         return {result: null, err: null}
-//     }
-// }
+
 const createTimeTableVersioning = ({stream_id, effective_from, effective_to}) => {
     const query = `INSERT INTO timetable_versions (stream_id, effective_from, effective_to)
                     VALUES ($1, $2, $3)

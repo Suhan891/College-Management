@@ -61,11 +61,6 @@ const createTimeTableVersioning  = (req, res, next) => {
         errorResponse.error = streamErr
         return res.status(status.SERVER_ERROR).json(errorResponse)
     }
-    // const {err: adressErr, result: adress} = serviceTimeTable.getCollegeFromAdress({adress_id: value.adressId})  -> This has been removed
-    // if(adressErr) {
-    //     errorResponse.error = adressErr
-    //     return res.status(status.SERVER_ERROR).json(errorResponse)
-    // }
 
     if( stream.college_id !== collegeId ) {
         errorResponse.message = "College Id not matching with the Stream"

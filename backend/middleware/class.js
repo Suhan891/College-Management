@@ -33,7 +33,7 @@ const validateClassCreation = (req, res, next) => {
         return res(status.SERVER_ERROR).json(errorResponse)
     }
     if(!isExistingCourse){
-        errorResponse.message = "No such course exists"
+        errorResponse.message = "No such course exists for your College"
         return res(status.NOT_FOUND).json(errorResponse)
     }
 
