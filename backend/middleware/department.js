@@ -2,7 +2,7 @@ const departmentValidations = require("../validations/department")
 const departmentService = require('../service/department')
 const { status } = require("../utils/constants")
 
-const validateStreamCreation = (req, res, next) => {
+const validateDepartmentCreation = (req, res, next) => {
     const collegeId = req.collegeId
     const {value, error} = departmentValidations.registerDepartment.validate(req.body)
     if(error) {
@@ -37,4 +37,8 @@ const validateStreamCreation = (req, res, next) => {
 
     req.departmentData = value
     next()
+}
+
+module.exports = {
+    validateDepartmentCreation
 }

@@ -9,7 +9,7 @@ const existingAttendanceSession = ({timetable_id, session_date}) => {
                     AND session_date = $2`
     const values = [timetable_id, session_date]
     try {
-        const result = dbQuery(query, value)
+        const result = dbQuery(query, values)
         return {result, err: null}
     } catch (error) {
         return {result: null, err: null}

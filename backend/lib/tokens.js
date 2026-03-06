@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
-const collegeRegistration = (collegeId,email, role) => {
+const collegeRegistration = ({collegeId,sub, role}) => {
     const payload = {
         collegeId,
+        sub,
         role
     }
     const token = jwt.sign(payload, process.env.COLLEGE_REGISTER_SECRET, { expiresIn: '24h' });
@@ -13,10 +14,6 @@ const verifyCollegeRegistrationToken = (token) => {
         return decoded;
     }
 
-    module.exports = {
-        collegeRegistration,
-        verifyCollegeRegistrationToken
-    }
 
 const createRefreshToken = (payload) => {
     const refreshToken = jwt.sign(
@@ -58,6 +55,8 @@ const verifyRolesToken = (token) => {
 }
 
 module.exports = {
+    collegeRegistration,
+    verifyCollegeRegistrationToken,
     createRefreshToken,
      createAccessToken,
       verifyAccessToken,

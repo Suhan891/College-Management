@@ -1,0 +1,204 @@
+const dbQuery = require("../db/db")
+// College Registration
+const existingUser = async ({email}) => {
+    const query = `SELECT EXISTS(
+                    SELECT 1
+                    FROM users
+                    WHERE email = $1)`
+    const value = [email]
+    try {
+        const result = await dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+// const existingCollege = async ({creator}) => {
+//     const query = `SELECT EXISTS(
+//                     SELECT 1
+//                     FROM colleges
+//                     WHERE creator = $1)`
+//     const value = [creator]
+//     try {
+//         const result = await dbQuery(query, value)
+//         return {result, err: null}
+//     } catch (error) {
+//         return {result: null, err: error}
+//     }
+// }
+const createUser = async ({name,email,password,role}) => {
+    const query = `INSERT INTO users(name, email, password,  role)
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING user_id`
+    const values = [name, email,password, role]
+    try {
+        const result = await dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+const createCollege = async ({college_id, college_name, college_logo, established_year, creator}) => {
+    const query = `INSERT INTO colleges (college_id, college_name, college_logo, established_year, creator)
+         VALUES ($1, $2, $3, $4, $5) RETURNING college_id`;
+    const values = [college_id, college_name, college_logo, established_year];
+    try {
+        const result = await dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+
+//After email Verification 
+const isUser = async ({user_id}) => {
+    const query = `SELECT EXISTS(
+                    SELECT 1
+                    FROM users
+                    WHERE user_id = $1)`
+    const value = [user_id]
+    try {
+        const result = await dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+const creatorFromCollege = async ({college_id}) => {
+    const query = `SELECT creator
+                    FROM colleges
+                    WHERE college_id = $1`
+    const value = [college_id]
+    try {
+        const result = await dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+const updateUser = async ({is_Email_verified, date_of_birth}) => {
+    const query = `INSERT INTO users (is_Email_verified, date_of_birth)
+         VALUES ($1, $2) RETURNING college_id`;
+    const values = [is_Email_verified, date_of_birth];
+    try {
+        const result = await dbQuery(query, values)
+        return {result, err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+// Adress -> Also created on email verification
+const existingAdress = ({college_id, latitude, longitude}) => {
+    const query = `SELECT EXISTS (
+                    SELECT 1
+                    FROM adress
+                    WHERE college_id = $1
+                    AND latitude = $2
+                    AND longitude = $3`
+    const values = [college_id, latitude, longitude]
+    try {
+        const result = dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result:  null, err: null}
+    }
+}
+const createAdress = ({college_id, latitude, longitude, location, city, state, country, pincode}) => {
+    const query = `INSERT INTO adress (college_id, latitude, longitude, location, city, state, country, pincode)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    RETURNING adress_id`
+    const values = [college_id, latitude, longitude, location, city, state, country, pincode]
+    try {
+        const result = dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: null}
+    }
+}
+
+// Calender
+const existingCalender = ({college_id, academic_session}) => {
+    const query = `SELECT EXISTS (
+                    SELECT 1
+                    FROM adress
+                    WHERE college_id = $1
+                    AND academic_session = $2`
+    const values = [college_id, academic_session]
+    try {
+        const result = dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result:  null, err: null}
+    }
+}
+const createCalender = ({college_id, academic_session, start_date, working_days }) => {
+    const query = `INSERT INTO calender (college_id, academic_session, start_date, working_days )
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING calender_id`
+    const values = [college_id, academic_session, start_date, working_days ]
+    try {
+        const result = dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: null}
+    }
+}
+
+// Special Date
+const existingSpecialDate = ({calender_id}) => {
+    const query = `SELECT EXISTS (
+                    SELECT 1
+                    FROM calendar_day_exception
+                    WHERE day_exceptions_id = $1`
+    const value = [calender_id]
+    try {
+        const result = dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result:  null, err: null}
+    }
+}
+const calenderExists = ({calender_id}) => {
+    const query = `SELECT EXISTS (
+                    SELECT 1
+                    FROM academic_calenders
+                    WHERE calender_id = $1`
+    const value = [calender_id]
+    try {
+        const result = dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result:  null, err: null}
+    }
+}
+const createSpecialDate = ({day_exceptions_id, specific_date, day_status, reason}) => {
+    const query = `INSERT INTO calender_day_exception (day_exceptions_id, specific_date, day_status, reason)
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING day_exceptions_id`
+    const values = [day_exceptions_id, specific_date, day_status, reason]
+    try {
+        const result = dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: null}
+    }
+}
+
+module.exports = {
+    existingUser,
+    createUser,
+    //existingCollege, -> If the user would not exist how will creator link with college
+    createCollege,
+
+    isValidCollege,
+        creatorFromCollege,
+    updateUser,
+    existingAdress,
+    createAdress,
+
+    existingCalender,
+    createCalender,
+    existingSpecialDate,
+    calenderExists,
+    createSpecialDate
+}

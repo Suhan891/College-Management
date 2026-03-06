@@ -1,4 +1,4 @@
-const { createCourse } = require("../service/course")
+const courseService = require("../service/course")
 const { status } = require("../utils/constants")
 const { successResponse, errorResponse } = require("../utils/response")
 
@@ -8,7 +8,7 @@ const createCourse = async (req, res) => {
     const courseData = req.courseData
 
     try {
-        const {error, result} = await createCourse({
+        const {error, result} = await courseService.createCourse({
             course_name: courseData.course_name,
              course_code: courseData.course_code, 
              duration_years: courseData.duration_years, 

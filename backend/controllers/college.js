@@ -2,20 +2,40 @@ const { registerCollegeQuery, getCollegeDetailsQuery, makeAddressQuery } = requi
 const { successResponse, errorResponse } = require("../utils/response");
 const { collegeRegistration, verifyCollegeRegistrationToken } = require("../lib/tokens");
 const { mailtrapEmailSend } = require("../lib/email");
+const hashing = require("../lib/hashing");
+
+const serviceCollege = require("../service/college");
+const { roles, status } = require("../utils/constants");
 
 
 
 
 const createCollege = async (req, res) => {
-    const {college_name, college_logo, established_year, email, password } = req.body;
+    const {user} = req.user
+    const {college} = req.college
+    //const {college_name, college_logo, established_year, email, password } = req.body;
         // Hnadle all try catch in service layer
-        const {result, error} = await registerCollegeQuery(college_name, college_logo, established_year, email, password);
-        if(error) {
-            errorResponse.error = error;
-            return res.status(500).json(errorResponse);
+        // const {result, error} = await registerCollegeQuery(college_name, college_logo, established_year, email, password);
+        // if(error) {
+        //     errorResponse.error = error;
+        //     return res.status(500).json(errorResponse);
+        // }
+        const hashedPassword = hashing.createPassword(user.password)
+        const {result: userResult, err: userErr} = await serviceCollege.createUser({name: user.name, email: user.email, password: hashedPassword, role: roles.COLLEGE})
+        if(userErr) {
+            errorResponse.error = userErr;
+            return res.status(status.SERVER_ERROR).json(errorResponse);
         }
 
-        const token = collegeRegistration(result.college_id, result.email, 'college');
+        const {result: collegeResult, err: collegeErr} = await serviceCollege.createCollege({college_id: userResult.college_id, college_name: college.collegeName, college_logo: college.collegeLogo, established_year: college.establishedYear, creator: userResult.user_id})
+        if(collegeErr) {
+            errorResponse.error = collegeErr;
+            return res.status(status.SERVER_ERROR).json(errorResponse);
+        }
+
+        const token = collegeRegistration({collegeId: collegeResult.college_id, sub: userResult.user_id, role: roles.COLLEGE})
+
+        
         const url = `${process.env.BASE_URL}/api/college/verify?token=${token}`;
 
         
@@ -28,7 +48,7 @@ const createCollege = async (req, res) => {
         
 
         successResponse.data = result;
-        successResponse.message = "Please verify your Email";
+        successResponse.message = "Please verify your Email in Inbox";
         return res.status(201).json(successResponse);
 }
 

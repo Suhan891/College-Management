@@ -5,19 +5,32 @@ const { status } = require('../utils/constants')
 
 const createTimeSlots = (req, res, next) => { // Later -> Also check from calender if today is a working day -> Will be done in controller
 
+    const collegeId = req.collegeId
+
     const {error, value} = validationTimetable.registerTimeSlot(req.body)
     if(error) {
         errorResponse.message = error.message[0]
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {err: timSlotErr, result: isTimeSlot} = serviceTimeTable.existingTimeSlots({period_number, start_time, end_time})
+    const {err: timSlotErr, result: isTimeSlot} = serviceTimeTable.existingTimeSlots({calender_id: value.calenderId, period_number: value.periodNumber})
     if(timSlotErr) {
         errorResponse.error = timSlotErr
         return res.status(status.SERVER_ERROR).json(errorResponse)
     }
     if(isTimeSlot) {
-        errorResponse.message = "Time Slot already created"
+        errorResponse.message = "With respect to the calender this period already exists"
+        return res.status(status.BAD_REQUEST).json(errorResponse)
+    }
+
+    const {result: calender, err: calenderErr} = serviceTimeTable.getCollegeFromtimeSlot({calender_id: value.calenderId})
+    if(calenderErr) {
+        errorResponse.error = calenderErr
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
+
+    if(calender.college_id !== collegeId) {
+        errorResponse.message = "Calender not matching with college"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
@@ -48,9 +61,14 @@ const createTimeTableVersioning  = (req, res, next) => {
         errorResponse.error = streamErr
         return res.status(status.SERVER_ERROR).json(errorResponse)
     }
+    const {err: adressErr, result: adress} = serviceTimeTable.getCollegeFromAdress({adress_id: value.adressId})
+    if(adressErr) {
+        errorResponse.error = adressErr
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
 
-    if(stream.college_id !== collegeId) {
-        errorResponse.message = "Stream not from same college"
+    if(stream.college_id !== collegeId || adress.college_id  !== collegeId) {
+        errorResponse.message = "College Id not matching with the given data"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 

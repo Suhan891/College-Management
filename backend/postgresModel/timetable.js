@@ -13,13 +13,14 @@ const subject_class = `CREATE TABLE class_subjects ( -- Changes has to be done
 const time_slots = `CREATE TABLE time_slots (
     time_slot_id SERIAL PRIMARY KEY,
 
-    college_id UUID REFERENCES colleges(college_id) ON DELETE CASCADE,
+     -- Removed college_id UUID instead kept callenderId
+    calender_id UUID NOT NULL REFERENES academic_calendars(calender_id), -- will be confirmed confirmed from college on creation
 
     period_number INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
 
-    UNIQUE (college_id, period_number)
+    UNIQUE (calender_id, period_number)
 );`
 // day_of_week
 // // Already made earlier
@@ -31,7 +32,7 @@ const time_slots = `CREATE TABLE time_slots (
 
 
 
-const timetable_versioning = `CREATE TABLE timetable_versions ( -- Not required as class verssioning will be done
+const timetable_versioning = `CREATE TABLE timetable_versions (
     version_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     stream_id UUID NOT NULL REFERENCES streams(stream_id) ON DELETE CASCADE,
 
@@ -39,14 +40,14 @@ const timetable_versioning = `CREATE TABLE timetable_versions ( -- Not required 
     effective_to DATE NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
 
+    adress_id UUID REFERENCES adress(adress_id) ON DELETE SET NULL, -- college will confirm the adress for this timetable creation
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 
 const timetable = `CREATE TABLE timetable (
     timetable_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id UUID NOT NULL REFERENCES timetable_versions(version_id) ON DELETE CASCADE,
-
-    calender_id UUID NOT NULL REFERENES academic_calendars(calender_id), -- will be created by backend when college creates
 
     class_subject_id UUID NOT NULL REFERENCES class_subjects(class_subject_id) ON DELETE CASCADE, -- this will provide the class id
 

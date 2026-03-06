@@ -1,8 +1,8 @@
 
 // const roles = `
-//     CREATE TYPE roles_entries AS ENUM (
-//     'admin', 'college', 'teacher', 'student'
-//     );
+    // CREATE TYPE roles_entries AS ENUM (
+    // 'admin', 'college', 'teacher', 'student'
+    // );
 // `
 
 // const user = `
@@ -18,6 +18,10 @@
 
 //     is_Email_verified BOOLEAN DEFAULT FALSE,
 //     is_active BOOLEAN DEFAULT FALSE,
+
+//     tokenVersion INT DEFAULT 0,
+//     resetPasswordToken VARCHAR(255) DEFAULT NULL,
+//     resetPasswordExpires TIME DEFAULT NULL
 
 //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 //     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
