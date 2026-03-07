@@ -23,8 +23,14 @@ const days = {
     SUNDAY: 'Sunday'
 }
 
+const dayStatus = {
+    WORKING: 'WORKING',
+    HOLIDAY: 'HOLIDAY'
+}
+
 module.exports = {
     roles,
     status,
-    days
+    days,
+    dayStatus
 }

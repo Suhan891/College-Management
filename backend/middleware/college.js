@@ -78,7 +78,8 @@ const validateCollegeEmailConfirmation = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    req.userValue = userValue
+    req.collegeId = decoded.collegeId
+    req.userData = userValue
     next()
 }
 
@@ -101,7 +102,7 @@ const validateCollegeAdress = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    req.addressValue = value
+    req.addressData = value
     next()
 }
 
@@ -133,27 +134,27 @@ const validateCollegeSpecialDate = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {result: isExistingSpecialDate, err: isExistingSpecialDateErr} = serviceCollege.existingSpecialDate({college_id: req.collegeId, specific_date: value.specificDate})
+    const {result: isExistingSpecialDate, err: isExistingSpecialDateErr} = serviceCollege.existingSpecialDate({calender_id: value.calenderId, specific_date: value.specificDate})
     if(isExistingSpecialDateErr) {
         errorResponse.error = isExistingSpecialDateErr
         return res.status(status.INTERNAL_SERVER_ERROR).json(errorResponse)
     }
     if(isExistingSpecialDate) {
-        errorResponse.message = "Special date already exists for this college on the given date"
+        errorResponse.message = "Special day already created on this date"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {result: calenderResult, err: calenderErr} = serviceCollege.getCalenderByCollegeId({college_id: collegeId})
+    const {result: calenderResult, err: calenderErr} = serviceCollege.calenderExists({calender_id: value.calenderId, college_id: collegeId})
     if(calenderErr) {
         errorResponse.error = calenderErr
         return res.status(status.INTERNAL_SERVER_ERROR).json(errorResponse)
     }
-    if(!calenderResult || calenderResult.length === 0) {
+    if(!calenderResult) {  // As this query will return true or false
         errorResponse.message = "Calendar not found for this college. Please create a calendar before adding special dates."
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
     
-    req.specialDateValue = value
+    req.specialDateData  = value
     next()
 }
 

@@ -67,7 +67,7 @@ const createTimeTableVersioning  = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    req.timetableversionData = value
+    req.timetableVersionData = value
     next()
 }
 

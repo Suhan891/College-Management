@@ -57,6 +57,8 @@ const validateUser = (req, res, next) => {
         collegeId: authData.college_id,
         userId: authData.userId
     }
+
+    next()
 }
 
 const validateCollegeHead = (req, res, next) => {

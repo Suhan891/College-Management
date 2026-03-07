@@ -78,7 +78,7 @@ const creatorFromCollege = async ({college_id}) => {
 }
 const updateUser = async ({is_Email_verified, date_of_birth}) => {
     const query = `INSERT INTO users (is_Email_verified, date_of_birth)
-         VALUES ($1, $2) RETURNING college_id`;
+         VALUES ($1, $2) RETURNING user_id`;
     const values = [is_Email_verified, date_of_birth];
     try {
         const result = await dbQuery(query, values)
@@ -131,11 +131,11 @@ const existingCalender = ({college_id, academic_session}) => {
         return {result:  null, err: null}
     }
 }
-const createCalender = ({college_id, academic_session, start_date, working_days }) => {
-    const query = `INSERT INTO calender (college_id, academic_session, start_date, working_days )
-                    VALUES ($1, $2, $3, $4)
+const createCalender = ({college_id, academic_session, start_date, working_days, end_date }) => {
+    const query = `INSERT INTO calender (college_id, academic_session, start_date, working_days, end_date )
+                    VALUES ($1, $2, $3, $4, $5)
                     RETURNING calender_id`
-    const values = [college_id, academic_session, start_date, working_days ]
+    const values = [college_id, academic_session, start_date, working_days, end_date ]
     try {
         const result = dbQuery(query, values)
         return {result: result.rows[0], err: null}
@@ -145,27 +145,29 @@ const createCalender = ({college_id, academic_session, start_date, working_days 
 }
 
 // Special Date
-const existingSpecialDate = ({calender_id}) => {
+const existingSpecialDate = ({calender_id, specific_date}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
                     FROM calendar_day_exception
-                    WHERE day_exceptions_id = $1`
-    const value = [calender_id]
+                    WHERE day_exceptions_id = $1
+                    AND specific_date = $2`
+    const values = [calender_id, specific_date]
     try {
-        const result = dbQuery(query, value)
+        const result = dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result:  null, err: null}
     }
 }
-const calenderExists = ({calender_id}) => {
+const calenderExists = ({calender_id, college_id}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
                     FROM academic_calenders
-                    WHERE calender_id = $1`
-    const value = [calender_id]
+                    WHERE calender_id = $1
+                    AND college_id = $2`
+    const values = [calender_id, college_id]
     try {
-        const result = dbQuery(query, value)
+        const result = dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result:  null, err: null}
@@ -190,14 +192,15 @@ module.exports = {
     //existingCollege, -> If the user would not exist how will creator link with college
     createCollege,
 
-    isValidCollege,
-        creatorFromCollege,
+    isUser,
+    creatorFromCollege,
     updateUser,
     existingAdress,
     createAdress,
 
     existingCalender,
     createCalender,
+
     existingSpecialDate,
     calenderExists,
     createSpecialDate

@@ -35,51 +35,26 @@ const createCollege = async (req, res) => {
 
         const token = collegeRegistration({collegeId: collegeResult.college_id, sub: userResult.user_id, role: roles.COLLEGE})
 
-        
+        const to = user.email
         const url = `${process.env.BASE_URL}/api/college/verify?token=${token}`;
-
+        const subject = "EduTrack - Email Verification"
+        const html = `<p>please verify your emal by clicking this link:</p>`        
         
-        
-        const response = await mailtrapEmailSend(email, url, 'register')
+        const response = await mailtrapEmailSend({to, url, subject, html})
         if(!response){
             errorResponse.message= "Mail sending Unsuccessfull"
             return res.status(500).json(errorResponse)
         }
         
-
         successResponse.data = result;
         successResponse.message = "Please verify your Email in Inbox";
         return res.status(201).json(successResponse);
 }
 
 const verifyEmail = async (req, res) => {  // On email verification
-    const { token } = req.query;
-    if(!token) {
-        errorResponse.message = "Token is required";
-        return res.status(400).json(errorResponse);
-    }
-    try {
-        const decoded = verifyCollegeRegistrationToken(token);
-        if(!decoded) {
-            errorResponse.message = "Invalid token";
-            return res.status(400).json(errorResponse);
-        }
-        const collegeId = decoded.collegeId;
-        const role = decoded.role;
-        if(role !== 'college') {
-            errorResponse.message = "Invalid token";
-            return res.status(400).json(errorResponse);
-        }
-
-        const {result, error} = await getCollegeDetailsQuery(collegeId);
-        if(error) {
-            errorResponse.error = error;
-            return res.status(500).json(errorResponse);
-        }
-        if(!result){
-            errorResponse.message = "No such college available"
-            return res.status(400).json(errorResponse)
-        }
+    const addressData = req.addressData
+    const userValue = req.userValue
+    const collegeId = req.collegeId
 
             // will be applied to frontend to get location
 // function getOneTimeLocation() {
@@ -111,25 +86,112 @@ const verifyEmail = async (req, res) => {  // On email verification
 //     );
 // }
 
-        const {latitude, longitude ,location, city, state, country, pincode} = req.body; // it will take address details from the request body and update the address table with the college id and address details, it will also update the location_id in the college table with the address id, this will be done in the service layer
-        // latitude and longitude will be send by frontend
-        const {result: res, error:err} = await makeAddressQuery({collegeId, latitude, longitude ,location, city, state, country, pincode})
-        // get college details from database using collegeId
-        // return college details
-        if(err) {
-            errorResponse.error = error;
-            return res.status(500).json(errorResponse);
+// Also collegeRadius will be received
+    try {
+        const {result: adress, err: adressErr} =  serviceCollege.createAdress({
+            college_id: collegeId,
+             latitude: addressData.latitude,
+              longitude: addressData.longitude,
+               location: addressData.location,
+                city: addressData.city,
+                 state: addressData.state,
+                  country: addressData.country,
+                   pincode: addressData.collegeRadius
+        })
+        if(adressErr) {
+            errorResponse.error = adressErr;
+            return res.status(status.SERVER_ERROR).json(errorResponse);
         }
+    
+        const emailVerified = true
+        const {result: user, err: userErr} = serviceCollege.updateUser({
+            is_Email_verified: emailVerified,
+             date_of_birth: userData.dob
+        })
+        if(userErr) {
+            errorResponse.error = userErr;
+            return res.status(status.SERVER_ERROR).json(errorResponse);
+        }
+    
+        successResponse.data = {
+            user: {
+                userId: user.user_id,
+                emailVerified,
+                dob: userValue.dob
+            },
+            adress: {
+                adressId: adress.adress_id,
+                ...addressData
+            }
+        }
+        successResponse.message = "Email Verification, with adress creation successfull"
+        return res.status(status.OK).json(successResponse)
     } catch (error) {
-        
+        errorResponse.error = error
+        return res.status(status.SERVER_ERROR).json(errorResponse)
     }
+}
 
+const createCalender = async (req, res) => {
+    const calenderValue = req.addressData
+    const collegeId = req.collegeId
+
+    try {
+        const {err, result} = await serviceCollege.createCalender({
+            college_id: collegeId,
+             academic_session: calenderValue.academicSession,
+              start_date:calenderValue.academicSession,
+               working_days: calenderValue.workingDays,
+               end_date: calenderValue.endDate
+            })
+        if(err){
+            errorResponse.error = err
+            return res.status(status.SERVER_ERROR).json(errorResponse)
+        }
+
+        const calenderId = result.calender_id
+        
+        successResponse.message = "New Calender Created"
+        successResponse.data = { calenderId, ...calenderValue}
+
+        return res.status(status.SUCCESS).json(successResponse)
+    } catch (error) {
+        errorResponse.error = error
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
+}
+
+const createSpecialDate = async (req, res) => {
+    const specialDateData = req.specialDateData
+
+    try {
+        const {err, result} = await serviceCollege.createCalender({
+            day_exceptions_id: specialDateData.calenderId,
+             specific_date: specialDateData.specificDate,
+              day_status: specialDateData.dayStatus,
+               reason: specialDateData.reason
+            })
+        if(err){
+            errorResponse.error = err
+            return res.status(status.SERVER_ERROR).json(errorResponse)
+        }
+
+        const dayExceptionId = result.day_exceptions_id
+        
+        successResponse.message = "Calender Exception day Created"
+        successResponse.data = { dayExceptionId, ...specialDateData}
+
+        return res.status(status.SUCCESS).json(successResponse)
+    } catch (error) {
+        errorResponse.error = error
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
 }
 
 
-
-
-
 module.exports = {
-    createCollege
+    createCollege,
+    verifyEmail,
+    createCalender,
+    createSpecialDate
 }

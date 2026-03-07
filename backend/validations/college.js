@@ -25,6 +25,8 @@ const registerAdress = Joi.object({
     state: Joi.string().required(),
     country: Joi.string().required(),
     pincode: Joi.number().integer().required(),
+
+    collegeRadius: Joi.number().integer().max(500) // based on college may provide
 })
 
 // All after login of College
@@ -35,6 +37,7 @@ const registerCalender = Joi.object({
     workingDays: Joi.array().items(Joi.string().valid(...Object.values(days))).min(1).unique().required()
 })
 const registerSpecialDate = Joi.object({
+    calenderId: Joi.string().uuid().required(),
     specificDate: Joi.string().required(),
     dayStatus: Joi.string().valid('WORKING', 'HOLIDAY'),
     reason: Joi.string(),

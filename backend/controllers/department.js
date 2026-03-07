@@ -20,7 +20,7 @@ const createDepartment = async (req, res) => {
         const departmentId = result.department_id
         
         successResponse.message = "New Department Created"
-        successResponse.data = { departmentId, ...result}
+        successResponse.data = { departmentId, ...departmentData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {

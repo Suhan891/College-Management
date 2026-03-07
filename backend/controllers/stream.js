@@ -20,7 +20,7 @@ const createStream = async (req, res) => {
         const streamId = result.stream_id
         
         successResponse.message = "New Stream Created"
-        successResponse.data = { streamId, ...result}
+        successResponse.data = { streamId, ...streamData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {

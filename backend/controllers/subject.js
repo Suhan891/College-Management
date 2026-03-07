@@ -18,7 +18,7 @@ const createSubject = async (req, res) => {
         const subjectId = result.subject_id
         
         successResponse.message = "New Subject Created"
-        successResponse.data = { subjectId, ...result}
+        successResponse.data = { subjectId, ...subjectData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
@@ -42,7 +42,7 @@ const createSubjectClass = async (req, res) => {
 
         const subjectClassId = result.class_subject_id
         successResponse.message = "New Subject Class Created"
-        successResponse.data = { subjectClassId, ...result}
+        successResponse.data = { subjectClassId, ...subjectClassData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {

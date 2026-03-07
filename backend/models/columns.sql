@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS address (
 
     latitude FLOAT,  -- this data will be based on the location access college will provide 
     longitude FLOAT, -- this data will be based on the location access college will provide 
+    college_radius INT DEFAULT 100, -- To store the radius of the college premises -> For validating attendance 
 
     location TEXT NOT NULL,
     city VARCHAR(255) NOT NULL,
@@ -131,9 +132,9 @@ CREATE TABLE classes (
 
     class_name VARCHAR(20) NOT NULL,
     class_teacher UUID REFERENCES teacher(teacher_id),
-
-    address_id UUID REFERENCES address(address_id) ON DELETE SET NULL;
+    address_id UUID REFERENCES address(address_id) ON DELETE SET NULL,
     academic_year INT NOT NULL, -- may be removed
+    address_id UUID REFERENCES address(address_id) ON DELETE SET NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -213,7 +214,9 @@ CREATE TABLE timetable_versions (
 
     effective_from DATE NOT NULL,
     effective_to DATE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE, -- This will be made in update route
+    is_active BOOLEAN DEFAULT TRUE,
+
+    --address_id UUID REFERENCES address(address_id) ON DELETE SET NULL, -- college will confirm the address for this timetable creation
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -253,11 +256,20 @@ CREATE TABLE attendance (
     timetable_id UUID NOT NULL REFERENCES timetable(timetable_id) ON DELETE CASCADE,
     session_id UUID NOT NULL REFERENCES attendance_sessions(session_id),
 
-    attendance_date DATE NOT NULL,
-    marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     -- attendance_date DATE NOT NULL, -- It has been removed -> we have created at
+    
     marking attendance_status DEFAULT 'ABSENT',
-
     source_role attendance_source DEFAULT 'STUDENT',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Similar to marked at option
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (student_id, timetable_id, attendance_date)
 );
+
+-- This removes the column and its foreign key constraint automatically
+ALTER TABLE timetable_versions 
+DROP COLUMN address_id;
+
+ALTER TABLE classes 
+ADD COLUMN address_id UUID REFERENCES address(address_id) ON DELETE SET NULL;

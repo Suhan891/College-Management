@@ -139,11 +139,11 @@ const getCollegeFromtimeSlot = ({time_slot_id}) => {
         return {result: null, err: null}
     }
 }
-const createTimeTable = ({version_id, calender_id, class_subject_id, time_slot_id, day}) => {
-    const query = `INSERT INTO timetable (version_id, calender_id, class_subject_id, time_slot_id, day)
-                    VALUES ($1, $2, $3, $4, $5)
+const createTimeTable = ({version_id, class_subject_id, time_slot_id, day}) => {
+    const query = `INSERT INTO timetable (version_id, class_subject_id, time_slot_id, day)
+                    VALUES ($1, $2, $3, $4)
                     RETURNING timetable_id`
-    const values = [version_id, calender_id, class_subject_id, time_slot_id, day]
+    const values = [version_id, class_subject_id, time_slot_id, day]
     try {
         const result = dbQuery(query, values)
         return {result, err: null}

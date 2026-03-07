@@ -1,6 +1,5 @@
 const Joi = require("joi");
 
-
 const registerAttendanceSession = Joi.object({
     timetableId: Joi.string().uuid().required(),
     sessionDate: Joi.string().required(),
@@ -8,6 +7,8 @@ const registerAttendanceSession = Joi.object({
     endTime: Joi.string().required(),
 })
 const registerAttendance = Joi.object({
+    latitude: Joi.number().required(),
+    longitude: Joi.number().required(),
     studentId: Joi.string().uuid().required(),
     timeTableId: Joi.string().uuid().required(),
     status: Joi.string().valid('PRESENT', 'ABSENT'),

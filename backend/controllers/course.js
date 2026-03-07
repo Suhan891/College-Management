@@ -23,7 +23,7 @@ const createCourse = async (req, res) => {
         const courseId = result.course_id
         
         successResponse.message = "New Course Created"
-        successResponse.data = { courseId, ...result}
+        successResponse.data = { courseId, ...courseData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {

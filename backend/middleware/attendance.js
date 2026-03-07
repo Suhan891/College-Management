@@ -1,7 +1,7 @@
 const validationAttendance = require('../validations/attendance')
 const serviceAttendance = require('../service/attendance')
 const { errorResponse } = require('../utils/response')
-const { status } = require('../utils/constants')
+const { status, roles } = require('../utils/constants')
 
 const createAttendanceSession = (req, res, next) => { // Later -> Also check from calender if today is a working day -> Will be done in controller
     const userId = req.userId
@@ -19,7 +19,7 @@ const createAttendanceSession = (req, res, next) => { // Later -> Also check fro
         return res.status(status.SERVER_ERROR).json(errorResponse)
     }
     if(isAttdSess) {
-        errorResponse.message = "Attendance session already created"
+        errorResponse.message = "Attendance session already exists"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
@@ -42,6 +42,15 @@ const createAttendanceSession = (req, res, next) => { // Later -> Also check fro
         errorResponse.message = "College Not matching"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
+
+    const {err: calenderErr, result: calender} = serviceAttendance.getCalenderFromTimetable({timetable_id: value.timeTableId})
+    if(calenderErr) {
+        errorResponse.error = calenderErr
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
+
+    req.calenderId = calender.calender_id
+    req.timeSlotId = calender.time_slot_id
 
     req.attendanceSessionData = value
     next()
@@ -90,12 +99,61 @@ const createAttendance = (req, res, next) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    req.attendanceData = {sessionId: session.session_id, ...value}
+//    req.classId = timetable.class_id -> May be removed
+
+    req.attendanceData = {sessionId: session.session_id, subjectTeacher: session.teacher, ...value}
+
+    next()
+}
+
+const authorizeCreateAccess = (req, res, next) => {  // Check of role and also check of source Role
+    const role = req.role
+    const userId = req.userId
+    const {sourceRole, timeTableId, subjectTeacher} = req.attendanceData
+
+    if(role !== roles.STUDENT || role !== roles.TEACHER) {
+        errorResponse.message = "Only teacher or student is allowed to access"
+        return res.status(status.BAD_REQUEST).json(errorResponse)
+    }
+
+    if(sourceRole === 'TEACHER' || sourceRole === 'CLASS_TEACHER') {
+        if(role !== roles.TEACHER) {
+            errorResponse.message = "You are not the Subject or Class teacher to create"
+            return res.status(status.BAD_REQUEST).json(errorResponse)
+        }
+
+        if(sourceRole === 'CLASS_TEACHER') {
+            const {err, result} = serviceAttendance.checkClassTeacher(userId)
+            if(err) {
+                errorResponse.error = err
+                return res.status(status.SERVER_ERROR).json(errorResponse)
+            }
+
+            if(!result) {
+                errorResponse.message = "Your Role is not class teacher"
+                return res.status(status.BAD_REQUEST).json(errorResponse)
+            }
+        } else if(sourceRole === 'TEACHER') {
+            
+            if(subjectTeacher !== userId) {
+                errorResponse.message = "You are not Authorized to Create"
+                return res.status(status.BAD_REQUEST).json(errorResponse)
+            }
+        }
+    }
+
+    if(sourceRole === STUDENT) {
+        if(role !== roles.STUDENT) {
+            errorResponse.message = "You are not the Student to create"
+            return res.status(status.BAD_REQUEST).json(errorResponse)
+        }
+    }
 
     next()
 }
 
 module.exports = {
     createAttendanceSession,
-     createAttendance
+     createAttendance,
+     authorizeCreateAccess
 }

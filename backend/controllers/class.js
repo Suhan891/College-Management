@@ -21,7 +21,7 @@ const createClass = async (req, res) => {
         const classId = result.class_id
         
         successResponse.message = "New Class Created"
-        successResponse.data = { classId, ...result}
+        successResponse.data = { classId, ...classData}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
