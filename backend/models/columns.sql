@@ -239,9 +239,9 @@ CREATE TABLE attendance_sessions ( -- Created by subject teacher
     timetable_id UUID NOT NULL REFERENCES timetable(timetable_id) ON DELETE SET NULL, -- it will have calendar of college
     teacher UUID NOT NULL REFERENCES teachers(teacher_id),
     
-    session_date DATE NOT NULL,
-    start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    end_time TIMESTAMP NOT NULL,
+    session_date DATE NOT NULL,  -- It should be default as current time stamp
+    start_time start_time TIMESTAMPTZ DEFAULT NOW(),
+    end_time TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '10 minutes'),
 
    
     is_open BOOLEAN DEFAULT TRUE,

@@ -70,9 +70,7 @@ const createAttendanceSession = async (req, res) => {
         const {err, result} = await timeTableService.createTimeSlots({
             timetable_id: attendanceSessionData.timetableId,
              teacher: userId,
-              session_date: attendanceSessionData.sessionDate,
-               start_time: attendanceSessionData.startTime,
-                end_time: attendanceSessionData.endTime
+              session_date: attendanceSessionData.sessionDate
             })
         if(err){
             errorResponse.error = err

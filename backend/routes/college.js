@@ -2,8 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-const query = require('../db/db');
-const { createCollege } = require('../controllers/college');
+const collegeController = require('../controllers/college');
 
 router.post('/register',createCollege)
 

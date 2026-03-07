@@ -100,11 +100,11 @@ const validTimeSlot = ({time_slot_id}) => {
         return {result: null, err: null}
     }
 }
-const createAttendanceSession = ({timetable_id, teacher, session_date, start_time, end_time}) => {
-    const query = `INSERT INTO attendance_sessions (timetable_id, teacher, session_date, start_time, end_time)
-                    VALUES ($1, $2, $3, $4, $5)
+const createAttendanceSession = ({timetable_id, teacher, session_date}) => {
+    const query = `INSERT INTO attendance_sessions (timetable_id, teacher, session_date)
+                    VALUES ($1, $2, $3 )
                     RETURNING session_id`
-    const values = [timetable_id, teacher, session_date, start_time, end_time]
+    const values = [timetable_id, teacher, session_date ]
     try {
         const result = dbQuery(query, values)
         return {result, err: null}
@@ -167,6 +167,20 @@ const getAttendanceSessionFromTimetable = ({timetable_id}) => {
         return {result: null, err: null}
     }
 }
+const checkSessionTime = ({session_id}) => {
+    const query = `SELECT EXISTS (
+                    SELECT 1
+                    FROM attendance_sessions
+                    WHERE session_id = $1 
+                    AND NOW() BETWEEN start_time AND end_time)`
+    const value = [session_id]
+    try {
+        const result = dbQuery(query, value)
+        return {result, err: null}
+    } catch (error) {
+        return {result: null, err: null}
+    }      
+}
 const checkClassTeacher = async (userId) => {
     const query = `SELECT EXISTS (
                     SELECT 1 
@@ -224,6 +238,7 @@ module.exports = {
     getClassFromTimetable,
     getAttendanceSessionFromTimetable,
     getAdressFromTimetable,
+    checkSessionTime,
     checkClassTeacher,
     createAttendance
 }

@@ -109,6 +109,7 @@ const createAttendance = (req, res, next) => {
 const authorizeCreateAccess = (req, res, next) => {  // Check of role and also check of source Role
     const role = req.role
     const userId = req.userId
+    const sessionId = req.attendanceData.sessionId
     const {sourceRole, timeTableId, subjectTeacher} = req.attendanceData
 
     if(role !== roles.STUDENT || role !== roles.TEACHER) {
@@ -145,6 +146,17 @@ const authorizeCreateAccess = (req, res, next) => {  // Check of role and also c
     if(sourceRole === STUDENT) {
         if(role !== roles.STUDENT) {
             errorResponse.message = "You are not the Student to create"
+            return res.status(status.BAD_REQUEST).json(errorResponse)
+        }
+
+        const {err: sessionErr, result: session} = serviceAttendance.checkSessionTime({session_id: sessionId})
+        if(sessionErr){
+            errorResponse.error = sessionErr
+            return res.status(status.SERVER_ERROR).json(errorResponse)
+        }
+
+        if(!session || session.length === 0) {
+            errorResponse.message = "Session Already expired. Please contact your teacher for Attendance"
             return res.status(status.BAD_REQUEST).json(errorResponse)
         }
     }

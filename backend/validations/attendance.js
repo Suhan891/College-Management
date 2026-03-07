@@ -2,9 +2,7 @@ const Joi = require("joi");
 
 const registerAttendanceSession = Joi.object({
     timetableId: Joi.string().uuid().required(),
-    sessionDate: Joi.string().required(),
-    startTime: Joi.string().required(),
-    endTime: Joi.string().required(),
+    sessionDate: Joi.string().required()
 })
 const registerAttendance = Joi.object({
     latitude: Joi.number().required(),
