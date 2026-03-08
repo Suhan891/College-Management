@@ -27,10 +27,10 @@ const existingUser = async ({email}) => {
 //     }
 // }
 const createUser = async ({name,email,password,role}) => {
-    const query = `INSERT INTO users(name, email, password,  role)
-                    VALUES ($1, $2, $3, $4)
+    const query = `INSERT INTO users(name, email, password,  role, name)
+                    VALUES ($1, $2, $3, $4, $5)
                     RETURNING user_id`
-    const values = [name, email,password, role]
+    const values = [name, email,password, role, name]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
@@ -38,24 +38,25 @@ const createUser = async ({name,email,password,role}) => {
         return {result: null, err: error}
     }
 }
-const createCollege = async ({college_id, college_name, college_logo, established_year, creator}) => {
-    const query = `INSERT INTO colleges (college_id, college_name, college_logo, established_year, creator)
-         VALUES ($1, $2, $3, $4, $5) RETURNING college_id`;
-    const values = [college_id, college_name, college_logo, established_year];
+const createCollege = async ({college_name, college_logo, established_year, creator}) => {
+    console.log({college_name, college_logo, established_year, creator})
+    const query = `INSERT INTO colleges (college_name, college_logo, established_year, creator)
+         VALUES ($1, $2, $3, $4) RETURNING college_id`;
+    const values = [college_name, college_logo, established_year, creator];
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error)
         return {result: null, err: error}
     }
 }
 
 //After email Verification 
 const isUser = async ({user_id}) => {
-    const query = `SELECT EXISTS(
-                    SELECT 1
+    const query = `SELECT is_Email_verified, role
                     FROM users
-                    WHERE user_id = $1)`
+                    WHERE user_id = $1`
     const value = [user_id]
     try {
         const result = await dbQuery(query, value)
@@ -76,42 +77,48 @@ const creatorFromCollege = async ({college_id}) => {
         return {result: null, err: error}
     }
 }
-const updateUser = async ({is_Email_verified, date_of_birth}) => {
-    const query = `INSERT INTO users (is_Email_verified, date_of_birth)
-         VALUES ($1, $2) RETURNING user_id`;
-    const values = [is_Email_verified, date_of_birth];
+const updateUser = async ({user_id, is_Email_verified, date_of_birth}) => {
+    const query = `UPDATE users
+                   SET is_Email_verified = $1,
+                       date_of_birth = $2,
+                       updated_at = CURRENT_TIMESTAMP
+                   WHERE user_id = $3
+                   RETURNING user_id`;
+    const values = [is_Email_verified, date_of_birth, user_id];
     try {
         const result = await dbQuery(query, values)
-        return {result, err: null}
+        return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: error}
     }
 }
 // Adress -> Also created on email verification
-const existingAdress = ({college_id, latitude, longitude}) => {
+const existingAdress = async ({college_id, latitude, longitude}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
-                    FROM adress
+                    FROM address
                     WHERE college_id = $1
                     AND latitude = $2
-                    AND longitude = $3`
+                    AND longitude = $3)`
     const values = [college_id, latitude, longitude]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result:  null, err: null}
     }
 }
-const createAdress = ({college_id, latitude, longitude, location, city, state, country, pincode}) => {
-    const query = `INSERT INTO adress (college_id, latitude, longitude, location, city, state, country, pincode)
+const createAdress = async ({college_id, latitude, longitude, location, city, state, country, pincode}) => {
+    const query = `INSERT INTO address (college_id, latitude, longitude, location, city, state, country, pincode)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                    RETURNING adress_id`
+                    RETURNING address_id`
     const values = [college_id, latitude, longitude, location, city, state, country, pincode]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
+        console.log("From Db: ",result)
         return {result: result.rows[0], err: null}
     } catch (error) {
+    console.log("From Db: ",error)
         return {result: null, err: null}
     }
 }

@@ -11,7 +11,7 @@ CREATE TABLE users (
      name VARCHAR(255),
      date_of_birth DATE DEFAULT NULL,
 
-     is_Email_verified BOOLEAN DEFAULT FALSE,
+     is_email_verified BOOLEAN DEFAULT FALSE,
      is_active BOOLEAN DEFAULT FALSE,
 
      tokenVersion INT DEFAULT 0,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS streams (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-     UNIQUE(course_id, stream_id)
+    UNIQUE(course_id, stream_id)
 );
 CREATE TABLE IF NOT EXISTS departments (
     department_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

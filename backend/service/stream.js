@@ -10,7 +10,7 @@ const validCourseExists = async ({ course_id, college_id}) => {
     const values = [course_id,college_id]
     try {
         const result = await dbQuery(query, values)
-        return {result, err: null}
+        return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: error}
     }
@@ -26,21 +26,25 @@ const streamAlreadyExists = async ({ course_id, stream_code}) => {
     const values = [course_id, stream_code]
     try {
         const result = await dbQuery(query, values)
-        return {result, err: null}
+                console.log("Db from existing stream: ",result)
+        return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log("Existing check from Db: ",error)
         return {result: null, err: error}
     }
 }
 
-const createStream = async ({course_id, stream_name, stream_code, hod}) => {
-    const query = `INSERT INTO departments (course_id, stream_name, stream_code, hod)
-                    VALUES ($1, $2, $3, $4)
-                    RETURNING department_id;`
-    const values = [course_id, stream_name, stream_code, hod]
+const createStream = async ({course_id, stream_name, stream_code}) => {
+    const query = `INSERT INTO streams (course_id, stream_name, stream_code)
+                    VALUES ($1, $2, $3)
+                    RETURNING stream_id;`
+    const values = [course_id, stream_name, stream_code]
     try {
         const result = await dbQuery(query, values)
+        console.log("Db create stream: ",result)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log("Existing create from Db: ",error)
         return {result: null, err: error}
     }
 }

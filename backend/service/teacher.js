@@ -1,7 +1,7 @@
 const dbQuery = require("../db/db");
 const { status } = require("../utils/constants");
 
-const existingUser = async (email) => {
+const existingUser = async ({email}) => {
     const query = `SELECT EXISTS (
                     SELECT 1 
                     FROM users 
@@ -10,7 +10,7 @@ const existingUser = async (email) => {
     const value = [email]
     try {
         const result = await dbQuery(query, value)
-        return {result, err: null}
+        return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: error}
     }
@@ -18,13 +18,14 @@ const existingUser = async (email) => {
 
 const createTeacher = async ({college_id, registered_batch_number, department_id, teacher_id}) => {
     const query = `INSERT INTO teachers (college_id, registered_batch_number, department_id, teacher_id)
-                    VALUES ($1, $2, $3, $4, $5)
+                    VALUES ($1, $2, $3, $4)
                     RETURNING teacher_id;`
     const values = [college_id, registered_batch_number, department_id, teacher_id]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error)
         return {result: null, err: error}
     }
 }
@@ -36,14 +37,10 @@ const existingTeacher = async ({registered_batch_number}) => {
     const values = [registered_batch_number]
     try {
         const result = await dbQuery(query, values)
-        if(result.rows.length === 0) {
-            errorResponse.message = "You are not authorized to access"
-            return {result: null, err: errorResponse, status: status.NOT_FOUND};
-        }
-        return { result: result.rows[0], err: null, status: null }
+        return { result: result.rows[0], err: null }
     } catch (error) {
         errorResponse.error = error
-        return {result: null, err: errorResponse, status: status.SERVER_ERROR}
+        return {result: null, err: errorResponse}
     }
 }
 

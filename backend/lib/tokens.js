@@ -37,8 +37,19 @@ const verifyRefreshToken = (token) => {
     return refreshData
 }
 const verifyAccessToken = (token) => {
-    const accessData = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
-    return accessData
+    if (!token || typeof token !== 'string') return null
+
+    // JWTs should have exactly 3 parts separated by '.'
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+
+    try {
+        const accessData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        return accessData;
+    } catch (err) {
+        // Invalid token (malformed/expired/invalid signature)
+        return null
+    }
 }
 
 const createRolesToken = (payload) => {

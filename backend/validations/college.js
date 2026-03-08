@@ -5,7 +5,8 @@ const { days, roles } = require("../utils/constants");
 const registerCollegeCreator = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    role: Joi.string().valid(roles.COLLEGE)
+    name: Joi.string().required()
+    //role: Joi.string().valid(roles.COLLEGE)
 })
 const registerCollege = Joi.object({
     collegeName: Joi.string().required(),

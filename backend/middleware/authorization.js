@@ -3,7 +3,7 @@ const tokens = require('../lib/tokens');
 const { errorResponse } = require("../utils/response");
 const { status, roles } = require("../utils/constants");
 
-const validateUser = (req, res, next) => {
+const validateUser = async (req, res, next) => {
     // Check of role
     const authHeader = req.headers?.authorization
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,7 +17,15 @@ const validateUser = (req, res, next) => {
     return res.status(status.BAD_REQUEST).json(errorResponse)
   }
 
-  const user = authorizationService.validateUserId(authData.userId)
+  const {result: user, err: userErr} = await authorizationService.validateUserId({user_id: authData.userId})
+  if(userErr) {
+    errorResponse.error = userErr
+    return res.status(status.SERVER_ERROR).json(errorResponse)
+  }
+  if(!user || user.length === 0) {
+    errorResponse.message = "No such user exists"
+    return res.status(status.BAD_REQUEST).json(errorResponse)
+  }
 
   if(user.role !== authData.role) {
     errorResponse.message = "Invalid token. Role not matching"
@@ -28,21 +36,21 @@ const validateUser = (req, res, next) => {
   if(authData.role === roles.ADMIN){
     // to be decided
   } else if(authData.role === roles.COLLEGE) {
-            const {result, err, status: stat} = authorizationService.checkCollegeRole(user_id)
+            const {result, err, status: stat} = await authorizationService.checkCollegeRole(user.user_id)
             if(err)
                 return res.status(stat).json(err)
 
             receivedCollegId = result.college_id
 
         } else if(authData.role === roles.TEACHER) {
-            const {result, err, status: stat} = authorizationService.checkTeacherRole(user_id)
+            const {result, err, status: stat} = await authorizationService.checkTeacherRole(user_id)
             if(err)
                 return res.status(stat).json(err)
 
             receivedCollegId = result.college_id
 
         } else if(authData.role === roles.STUDENT) {
-            const {result, err, status: stat} = authorizationService.checkStudentRole(user_id)
+            const {result, err, status: stat} = await authorizationService.checkStudentRole(user_id)
             if(err)
                 return res.status(stat).json(err)
 
@@ -52,19 +60,19 @@ const validateUser = (req, res, next) => {
         errorResponse.message = "Invalid Token. College Id not matching"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
-    req = {
-        role: user.role,
-        collegeId: authData.college_id,
-        userId: authData.userId
-    }
+
+    req.role = user.role
+    req.collegeId = authData.college_id
+    req.userId = authData.userId
 
     next()
 }
 
-const validateCollegeHead = (req, res, next) => {
-    const {userId} = req
+const validateCollegeHead = async (req, res, next) => {
+    const userId = req.userId
+    const collegeId = req.college_id
 
-    const {result, err, status: stat} = authorizationService.checkCollegHead(userId);
+    const {result, err, status: stat} = await authorizationService.checkCollegHead({creator: userId});
     if(err)
         return res.status(stat).json(err)
 

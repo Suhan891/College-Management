@@ -3,8 +3,7 @@ const { roles } = require('../utils/constants')
 
 const validateLogin = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().required(),
-    role: Joi.string().valid(roles.ADMIN, roles.COLLEGE, roles.STUDENT, roles.TEACHER)
+    password: Joi.string().required()
 })
 const validateEmailVerifyRoles = Joi.object({
     email: Joi.string().email().required(),

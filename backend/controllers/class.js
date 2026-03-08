@@ -1,6 +1,6 @@
 const classService = require('../service/class')
 const { status } = require('../utils/constants')
-const { errorResponse } = require('../utils/response')
+const { errorResponse, successResponse } = require('../utils/response')
 
 const createClass = async (req, res) => {
     const classData = req.classData
@@ -11,12 +11,13 @@ const createClass = async (req, res) => {
              class_name: classData.className,
               class_teacher: classData.classTeacher,
                academic_year: classData.academicYear,
-                adress_id: classData.adressId
+                address_id: classData.adressId
             })
         if(err){
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
+        console.log("After Db")
 
         const classId = result.class_id
         

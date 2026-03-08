@@ -5,27 +5,36 @@ const { findUser, validateUserId, getUser } = require("../service/user")
 const { status } = require("../utils/constants")
 const { errorResponse } = require("../utils/response")
 
-const validateUserLogin = (req, res, next) => {
+const validateUserLogin = async (req, res, next) => {
     const {error, value} = validateCommon.validateLogin.validate(req.body) // also add some to return not extra than these
     if(error){
-        errorResponse.message = error  // may return message in .message
+        errorResponse.message = error.details[0].message.replace(/"/g, "")  // may return message in .message
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
     const email = value.email
-    const {result, err, status: stat} = findUser(email);
-    if(err)
-        return res.status(stat).json(err)
+    const {result, err} = await findUser(email);
+    if(err) {
+        errorResponse.error = err
+        return res.status(status.SERVER_ERROR).json(errorResponse)
+    }
+
+    if(!result || result.length === 0) {
+        errorResponse.message = "No such user exists"
+        return res.status(status.BAD_REQUEST).json(errorResponse)
+    }
 
     const isMatch = checkLogin(value.password, result.password)
 
     if(!isMatch){
-        errorResponse.message = "Please provide a valid password"
+        errorResponse.message = "Password Not matching"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    if(result.role !== value.role){  // Checked if doing login with registered role
-        errorResponse.message = "Provide a valid role"
+    console.log("Result received: ",result)
+
+    if(!result.is_email_verified){
+        errorResponse.message = "Please verify your email before Login"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
@@ -33,7 +42,7 @@ const validateUserLogin = (req, res, next) => {
     next()
 }
 
-const validateRefreshAccess = (req, res, next) => {
+const validateRefreshAccess = async (req, res, next) => {
     const token = req.cookies?.refreshToken
     if(!token) {
         errorResponse.message = "Token not available"
@@ -42,10 +51,12 @@ const validateRefreshAccess = (req, res, next) => {
 
     const refreshData = tokens.verifyRefreshToken(token)
 
-    const {result, err, status: stat} = validateUserId(refreshData.sub);
+    const {result, err, status: stat} = await validateUserId(refreshData.sub);
     if(err)
         return res.status(stat).json(err)
 
+    console.log("Result: ", result)
+    console.log("Refresh data:", refreshData)
     if(result.tokenVersion !== refreshData.tokenVersion){
         errorResponse.message = "Login to create a new Token"
         return res.status(status.BAD_REQUEST).json(errorResponse)

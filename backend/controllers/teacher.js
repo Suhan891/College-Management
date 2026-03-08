@@ -1,12 +1,15 @@
 const userService = require("../service/user");
 const teacherService = require("../service/teacher")
 const { roles, status } = require("../utils/constants");
+const { errorResponse, successResponse } = require("../utils/response");
 
 const createTeacher = async (req, res) => {
     const collegeId = req.collegeId
+
     const teacherData = req.teacherData
+    console.log("In controller")
     try {
-        const {result: user, err: err1} = userService.createUser({
+        const {result: user, err: err1} = await userService.createUser({
             name: teacherData.name,
             email: teacherData.email,
             role: roles.TEACHER
@@ -16,7 +19,7 @@ const createTeacher = async (req, res) => {
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 
-        const {result: teacher, err: err2} = teacherService({
+        const {result: teacher, err: err2} = await teacherService.createTeacher({
             college_id: collegeId,
              registered_batch_number: teacherData.batchNumber,
               department_id: teacherData.departmentId,
@@ -26,11 +29,12 @@ const createTeacher = async (req, res) => {
             errorResponse.error = err2
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
+        console.log("Last controller", teacher)
 
         const teacherId = teacher.teacher_id
         successResponse.message = "Teacher created successfully"
         successResponse.data = {teacherId, ...teacherData}
-        return res.status(status.SUCCESS).json(errorResponse)
+        return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
         errorResponse.error = error
         return res.status(status.SERVER_ERROR).json(errorResponse)

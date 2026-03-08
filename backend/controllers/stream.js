@@ -1,6 +1,6 @@
 const streamService = require('../service/stream')
 const { status } = require('../utils/constants')
-const { errorResponse } = require('../utils/response')
+const { errorResponse, successResponse } = require('../utils/response')
 
 const createStream = async (req, res) => {
     const streamData = req.streamData
@@ -9,13 +9,13 @@ const createStream = async (req, res) => {
         const {err, result} = await streamService.createStream({
             course_id: streamData.courseId,
              stream_name: streamData.streamName,
-              stream_code: streamData.streamCode,
-               hod: streamData.hod
+              stream_code: streamData.streamCode
             })
         if(err){
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
+        console.log(result)
 
         const streamId = result.stream_id
         

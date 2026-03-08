@@ -83,7 +83,7 @@ const studentRegisters = async (req, res) => {
       const subject = `College Logo:${college.college_logo}. We ${college.college_name} invite you to verify your Email`
       const html = `<p>Hello ${user.name} please click the below link: <br/> ${url}</p>`
 
-      const response = await mailtrapEmailSend({to: user.email, url,subject,html, purpose})
+      const response = await mailtrapEmailSend({to: user.email, url,subject,html})
         if(!response){
             errorResponse.message= "Mail sending Unsuccessfull"
             return res.status(500).json(errorResponse)

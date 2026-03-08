@@ -6,17 +6,17 @@ const mailtrapEmailSend = async ({to, url, subject, html }) => {
       if (
     !process.env.SMTP_HOST ||
     !process.env.SMTP_USER ||
-    !process.env.SMTP_PASS
+    !process.env.SMTP_PASSWORD
   ) {
     console.log("Email envs r not available");
-    return;
+    return false;
   }
 
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || "587");
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.EMAIL_FROM;
+  const pass = process.env.SMTP_PASSWORD;
+  //const from = process.env.EMAIL_FROM;
 
   const transporter = nodemailer.createTransport({
     host,
@@ -28,18 +28,15 @@ const mailtrapEmailSend = async ({to, url, subject, html }) => {
     },
   });
 
-  if(purpose === emailResponse.register.purpose){
-    subject = emailResponse.register.subject
-    html = `${emailResponse.register.html}?token=${url}`
-  }
 
     await transporter.sendMail({
-    from,
+    from: "EduTech",
     to,
     subject,
     html,
   });
 
+  console.log("Email Send")
   return true
 }
 

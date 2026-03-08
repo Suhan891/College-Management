@@ -21,13 +21,8 @@ const { errorResponse, successResponse } = require("../utils/response")
 
 const login = async (req, res) => {
     try {
-        const {user_id, role, name, is_Email_verified, email} = req.user
+        const {user_id, role, name, email} = req.user
     
-        if(!is_Email_verified){
-            errorResponse.message = "Please verify your email to Login"
-            return res.status(400).json(errorResponse)
-        }
-
         let refreshData = null
         let accessData = null
         let data = {}
@@ -80,7 +75,7 @@ const login = async (req, res) => {
 
 
         successResponse.message = "Login Successfull"
-        successResponse.data = { ...data, accessToken}
+        successResponse.data = { ...data, accessToken, email}
 
         return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
@@ -90,7 +85,7 @@ const login = async (req, res) => {
 }
 
 const refreshAccessHandler = async (req, res) => {  // Just copied from login
-    const {user_id, role, name} = req.user
+    const {user_id, role, name, tokenVersion} = req.user
 
     let refreshData = null
         let accessData = null
@@ -105,9 +100,9 @@ const refreshAccessHandler = async (req, res) => {  // Just copied from login
                 if(err)
                     return res.status(stat).json(err)
     
-                refreshData = {sub: result.creator, college: result.colleg_id, tokenVersion: result.tokenVersion}
+                refreshData = {sub: result.creator, college: result.colleg_id, tokenVersion}
     
-                accessData = {college_id: result.college_id, role, creator: result.creator} // access token 
+                accessData = {college_id: result.college_id, role, userId: result.creator} // access token 
     
                 data = {...result, creator_name: name, role}
     
@@ -116,7 +111,7 @@ const refreshAccessHandler = async (req, res) => {  // Just copied from login
                 if(err)
                     return res.status(stat).json(err)
     
-                refreshData = {sub: user_id, tokenVersion: result.tokenVersion}
+                refreshData = {sub: user_id, tokenVersion}
     
                 accessData = {college_id: result.college_id, role, userId: user_id}
     
@@ -126,7 +121,7 @@ const refreshAccessHandler = async (req, res) => {  // Just copied from login
                 if(err)
                     return res.status(stat).json(err)
     
-                refreshData = {sub: user_id, tokenVersion: result.tokenVersion}
+                refreshData = {sub: user_id, tokenVersion}
     
                 accessData = {college_id: result.college_id, role, userId: user_id}
     
@@ -190,6 +185,7 @@ const emailVerificationRoles = async (req, res) => {
 module.exports = {
     login,
     // refresh access token
+    refreshAccessHandler,
     emailVerificationRoles,
      logout
 }

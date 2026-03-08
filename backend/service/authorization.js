@@ -1,31 +1,29 @@
 const dbQuery = require("../db/db")
 const { status } = require("../utils/constants")
+const { errorResponse } = require("../utils/response");
 
-const validateUserId = async (userId) => {
+const validateUserId = async ({user_id}) => {
     const query = `SELECT user_id, role, tokenVersion
                     FROM users 
                     WHERE user_id =  $1`;
-    const value = [userId]
+    const value = [user_id]
     try {
         const result = await dbQuery(query, value)
-        if(result.rows.length === 0) {
-            errorResponse.message = "No such User Available"
-            return {result: null, err: errorResponse, status: status.NOT_FOUND};
-        }
-        return { result: result.rows[0], err: null, status: null }
+        return { result: result.rows[0], err: null }
     } catch (error) {
-        errorResponse.error = error
-        return {result: null, err: errorResponse, status: status.SERVER_ERROR}
+        console.log("From Db", error)
+        return {result: null, err: error}
     }
 } 
 
-const checkCollegHead = async (userId) => {
+const checkCollegHead = async ({creator}) => {
     const query = `SELECT college_id
                    FROM colleges
                    WHERE creator = $1`
-    const value = [userId]
+    const value = [creator]
     try {
         const result = await dbQuery(query, value)
+        console.log("From db",result)
         if(result.rows.length === 0) {
             errorResponse.message = "You are not authorized to access"
             return {result: null, err: errorResponse, status: status.NOT_FOUND};

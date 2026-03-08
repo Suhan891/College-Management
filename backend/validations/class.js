@@ -14,6 +14,5 @@ const registerClass = Joi.object({
 })
 
 module.exports = {
-    versioningClass,
     registerClass
 }

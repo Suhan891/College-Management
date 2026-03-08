@@ -7,60 +7,74 @@ const serviceCollege = require("../service/college");
 const { roles, status } = require("../utils/constants");
 
 const createCollege = async (req, res) => {
-  const { user } = req.user;
-  const { college } = req.college;
+  const user = req.user;
+  const college = req.college;
+  console.log(college)
 
-  const hashedPassword = hashing.createPassword(user.password);
-  const { result: userResult, err: userErr } = await serviceCollege.createUser({
-    name: user.name,
-    email: user.email,
-    password: hashedPassword,
-    role: roles.COLLEGE,
-  });
-  if (userErr) {
-    errorResponse.error = userErr;
-    return res.status(status.SERVER_ERROR).json(errorResponse);
-  }
-
-  const { result: collegeResult, err: collegeErr } =
-    await serviceCollege.createCollege({
-      college_id: userResult.college_id,
-      college_name: college.collegeName,
-      college_logo: college.collegeLogo,
-      established_year: college.establishedYear,
-      creator: userResult.user_id,
+  try {
+    const hashedPassword = hashing.createPassword(user.password);
+    const { result: userResult, err: userErr } = await serviceCollege.createUser({
+      name: user.name,
+      email: user.email,
+      password: hashedPassword,
+      name: user.name,
+      role: roles.COLLEGE,
     });
-  if (collegeErr) {
-    errorResponse.error = collegeErr;
-    return res.status(status.SERVER_ERROR).json(errorResponse);
+    if (userErr) {
+      errorResponse.error = userErr;
+      console.log("User Error")
+      return res.status(status.SERVER_ERROR).json(errorResponse);
+    }
+      console.log("After user creation",userResult)
+  
+    const { result: collegeResult, err: collegeErr } =
+      await serviceCollege.createCollege({
+        college_name: college.collegeName,
+        college_logo: college.collegeLogo,
+        established_year: college.establishedYear,
+        creator: userResult.user_id,
+      });
+    if (collegeErr) {
+      errorResponse.error = collegeErr;
+      console.log("College Error")
+      return res.status(status.SERVER_ERROR).json(errorResponse);
+    }
+  
+    const token = availableToken.collegeRegistration({
+      collegeId: collegeResult.college_id,
+      sub: userResult.user_id,
+      role: roles.COLLEGE,
+    });
+  
+    const to = user.email;
+    const url = `${process.env.BASE_URL}/college/verify-email?token=${token}`;  // For know it is backend base url -> later frontend base url
+    const subject = "EduTrack - Email Verification";
+    const html = `<p>please verify your emal by clicking this link:</p><br/>${url}`;
+  
+    const response = await mailtrapEmailSend({ to, url, subject, html });
+    if (!response) {
+      errorResponse.message = "Mail sending Unsuccessfull";
+      return res.status(500).json(errorResponse);
+    }
+  
+    successResponse.data = {
+        userId: userResult.user_id,
+        collegeId: collegeResult.college_id
+    };
+    successResponse.message = "Please verify your Email in Inbox";
+    return res.status(201).json(successResponse);
+  } catch (error) {
+    errorResponse.error = error
+    return res.status(status.SERVER_ERROR).json(errorResponse)
   }
-
-  const token = availableToken.collegeRegistration({
-    collegeId: collegeResult.college_id,
-    sub: userResult.user_id,
-    role: roles.COLLEGE,
-  });
-
-  const to = user.email;
-  const url = `${process.env.BASE_URL}/api/college/verify?token=${token}`;
-  const subject = "EduTrack - Email Verification";
-  const html = `<p>please verify your emal by clicking this link:</p>`;
-
-  const response = await mailtrapEmailSend({ to, url, subject, html });
-  if (!response) {
-    errorResponse.message = "Mail sending Unsuccessfull";
-    return res.status(500).json(errorResponse);
-  }
-
-  successResponse.data = result;
-  successResponse.message = "Please verify your Email in Inbox";
-  return res.status(201).json(successResponse);
 };
 
 const verifyEmail = async (req, res) => {  // On email verification
     const addressData = req.addressData
-    const userValue = req.userValue
+    const userValue = req.userData
     const collegeId = req.collegeId
+
+    console.log({addressData, userValue, collegeId})
 
             // will be applied to frontend to get location
 // function getOneTimeLocation() {
@@ -94,7 +108,7 @@ const verifyEmail = async (req, res) => {  // On email verification
 
 // Also collegeRadius will be received
     try {
-        const {result: adress, err: adressErr} =  serviceCollege.createAdress({
+        const {result: address, err: addressErr} = await serviceCollege.createAdress({
             college_id: collegeId,
              latitude: addressData.latitude,
               longitude: addressData.longitude,
@@ -102,22 +116,26 @@ const verifyEmail = async (req, res) => {  // On email verification
                 city: addressData.city,
                  state: addressData.state,
                   country: addressData.country,
-                   pincode: addressData.collegeRadius
+                   pincode: addressData.pincode
         })
-        if(adressErr) {
-            errorResponse.error = adressErr;
+        if(addressErr) {
+            errorResponse.error = addressErr;
+            
             return res.status(status.SERVER_ERROR).json(errorResponse);
         }
-    
+
+        console.log("Now user updation")
         const emailVerified = true
-        const {result: user, err: userErr} = serviceCollege.updateUser({
+        const {result: user, err: userErr} = await serviceCollege.updateUser({
+            user_id: req.userId,
             is_Email_verified: emailVerified,
-             date_of_birth: userData.dob
+            date_of_birth: userValue.dob
         })
         if(userErr) {
             errorResponse.error = userErr;
             return res.status(status.SERVER_ERROR).json(errorResponse);
         }
+
     
         successResponse.data = {
             user: {
@@ -126,11 +144,11 @@ const verifyEmail = async (req, res) => {  // On email verification
                 dob: userValue.dob
             },
             adress: {
-                adressId: adress.adress_id,
+                addressId: address.address_id,
                 ...addressData
             }
         }
-        successResponse.message = "Email Verification, with adress creation successfull"
+        successResponse.message = "Email Verification with adress creation successfull"
         return res.status(status.OK).json(successResponse)
     } catch (error) {
         errorResponse.error = error

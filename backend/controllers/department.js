@@ -1,18 +1,20 @@
 const departmentService = require('../service/department')
 const { status } = require('../utils/constants')
-const { errorResponse } = require('../utils/response')
+const { errorResponse, successResponse } = require('../utils/response')
 
 const createDepartment = async (req, res) => {
     const departmentData = req.departmentData
-
+    console.log(departmentData)
     try {
         const {err, result} = await departmentService.createDepartment({
             stream_id: departmentData.streamId,
              department_name: departmentData.departmentName,
-              department_code: departmentData.departmentCode,
-               hod: departmentData.hod
+              department_code: departmentData.departmentCode
+               //hod: departmentData.hod
             })
         if(err){
+            console.log(err);
+            
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }

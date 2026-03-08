@@ -9,8 +9,9 @@ const createUser = async ({name,email,role}) => {
     const values = [name, email, role]
     try {
         const result = await dbQuery(query, values)
-        return {result, err: null}
+        return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error)
         return {result: null, err: error}
     }
 }
@@ -22,11 +23,7 @@ const findUser = async (email) => {
     const value = [email]
     try {
         const result = await dbQuery(query, value)
-        if(result.rows.length === 0) {
-            errorResponse.message = "No such User Available"
-            return {result: null, err: errorResponse, status: status.NOT_FOUND};
-        }
-        return { result: result.rows[0], err: null, status: null }
+        return { result: result.rows[0], err: null }
     } catch (error) {
         errorResponse.error = error
         return {result: null, err: errorResponse, status: status.SERVER_ERROR}
@@ -39,6 +36,7 @@ const validateUserId = async (userId) => {
     const value = [userId]
     try {
         const result = await dbQuery(query, value)
+        console.log("From Db: ", result.rows[0])
         if(result.rows.length === 0) {
             errorResponse.message = "No such User Available"
             return {result: null, err: errorResponse, status: status.NOT_FOUND};

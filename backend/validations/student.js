@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const validateStudentCreation = Joi.object({
     name: Joi.string().required(),
-    email: Joi.email().required(),
+    email: Joi.string().email().required(),
     role: Joi.string().required(),
     enrollmentNumber: Joi.number().integer().positive().required(),
     registeredRoll: Joi.number().integer().positive().required(),
@@ -21,6 +21,5 @@ const validateStudentRegistration = Joi.object({
 
 module.exports = {
     validateStudentCreation,
-    validateStudentRegistration,
-    validateEmailVerification
+    validateStudentRegistration
 }
