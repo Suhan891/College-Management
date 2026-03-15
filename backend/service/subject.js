@@ -31,13 +31,14 @@ const getCollegeId = async ({department_id}) => {  // For subject
 }
 const createSubject = async ({department_id, subject_name}) => {
     const query = `INSERT INTO subjects(department_id, subject_name)
-                    VALUES ($1, $2, $3)
+                    VALUES ($1, $2)
                     RETURNING subject_id`
     const values = [department_id, subject_name]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error)
         return {result: null, err: error}
     }
 }
@@ -89,9 +90,10 @@ const getCollegeFromClass = async ({class_id}) => {
                     JOIN streams s ON s.stream_id = cls.stream_id
                     JOIN courses c ON c.course_id = s.course_id
                     WHERE cls.class_id = $1`
-    const value = [department_id]
+    const value = [class_id]
     try {
         const result = await dbQuery(query, value)
+        console.log(result)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: error}
@@ -99,13 +101,15 @@ const getCollegeFromClass = async ({class_id}) => {
 }
 const createSubjectClass = async ({class_id, subject_id, teacher_id}) => {
     const query = `INSERT INTO class_subjects (class_id, subject_id, teacher_id)
-                    VALUES (class_id, subject_id, teacher_id)
+                    VALUES ($1, $2, $3)
                     RETURNING class_subject_id`
     const values = [class_id, subject_id, teacher_id]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error);
+        
         return {result: null, err: error}
     }
 }

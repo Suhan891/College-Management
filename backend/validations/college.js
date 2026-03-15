@@ -11,17 +11,16 @@ const registerCollegeCreator = Joi.object({
 const registerCollege = Joi.object({
     collegeName: Joi.string().required(),
     establishedYear: Joi.number().integer().required(),
-    collegeLogo: Joi.string().required()
+    collegeLogo: Joi.string() || "logo.png"
 })
 
 // On College email confirmation
 const confirmEmail = Joi.object ({
-    dob: Joi.string()
+    dob: Joi.string().required()
 })
 const registerAdress = Joi.object({
     latitude: Joi.number().required(), // Allowed float data type
     longitude: Joi.number().required(), // Allowed float data type
-    location: Joi.string().required(),
     city: Joi.string().required(),
     state: Joi.string().required(),
     country: Joi.string().required(),
@@ -35,7 +34,7 @@ const registerCalender = Joi.object({
     academicSession: Joi.string().required(),
     startDate: Joi.string().required(),
     endDate: Joi.string().required(),
-    workingDays: Joi.array().items(Joi.string().valid(...Object.values(days))).min(1).unique().required()
+    workingDays: Joi.array().items(Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')).min(1).unique().required()
 })
 const registerSpecialDate = Joi.object({
     calenderId: Joi.string().uuid().required(),

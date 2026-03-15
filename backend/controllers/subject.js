@@ -1,6 +1,6 @@
 const subjectService = require('../service/subject')
 const { status } = require('../utils/constants')
-const { errorResponse } = require('../utils/response')
+const { errorResponse, successResponse } = require('../utils/response')
 
 const createSubject = async (req, res) => {
     const subjectData = req.subjectData
@@ -14,6 +14,8 @@ const createSubject = async (req, res) => {
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
+        console.log(result);
+        
 
         const subjectId = result.subject_id
         
@@ -31,10 +33,11 @@ const createSubjectClass = async (req, res) => {
     const subjectClassData = req.subjectClassData
 
     try {
-        const {result, err} = subjectService.createSubjectClass({
+        const {result, err} = await subjectService.createSubjectClass({
             class_id: subjectClassData.classId,
              subject_id: subjectClassData.subjectId,
-              teacher_id: subjectClassData.teacherId})
+              teacher_id: subjectClassData.teacherId
+            })
         if(err){
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)

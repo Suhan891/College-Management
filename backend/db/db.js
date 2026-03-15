@@ -13,6 +13,7 @@ const dbQuery = async (text, params) => {
         const res = await pool.query(text, params);
         return res;
     } catch (error) {
+        console.error(error)
         throw error;
     }
 }

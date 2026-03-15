@@ -45,20 +45,20 @@ const validateClassCreation = async (req, res, next) => {
         return res.status(status.NOT_FOUND).json(errorResponse)
     }
 
-    const {err: addressErr, result: address} = await classService.getCollegeFromAdress({adress_id: value.adressId})
+    const {err: addressErr, result: address} = await classService.getAdressFromCollege({college_id: collegeId})
     if(addressErr) {
         errorResponse.error = addressErr
         return res.status(status.SERVER_ERROR).json(errorResponse)
     }
     console.log(address)
 
-    if(address.college_id !== collegeId) {
-        errorResponse.message = "No such Adress Exists for your College"
-        return res.status(status.NOT_FOUND).json(errorResponse)
-    }
+    // if(!address ) {
+    //     errorResponse.message = "No such Adress Exists for your College"
+    //     return res.status(status.NOT_FOUND).json(errorResponse)
+    // }
 
-
-    req.classData = value
+    const adressId =  address.address_id
+    req.classData = {adressId ,...value}
     next()
 }
 

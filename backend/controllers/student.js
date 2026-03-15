@@ -1,15 +1,16 @@
 const userService = require("../service/user");
 const studentService = require("../service/student");
 const { roles, status } = require("../utils/constants");
-const { errorResponse } = require("../utils/response");
+const { errorResponse, successResponse } = require("../utils/response");
 const tokens = require("../lib/tokens");
 const { mailtrapEmailSend } = require("../lib/email");
 
 const createStudent = async (req, res) => {
   const collegeId = req.collegeId;
   const studentData = req.studentData;
+  console.log("Student Data", studentData)
   try {
-    const { result: user, err: err1 } = userService.createUser({
+    const { result: user, err: err1 } = await userService.createUser({
       name: studentData.name,
       email: studentData.email,
       role: roles.STUDENT,
@@ -18,16 +19,17 @@ const createStudent = async (req, res) => {
       errorResponse.error = err1;
       return res.status(status.SERVER_ERROR).json(errorResponse);
     }
-
-    const { result: student, err: err2 } = studentService({
+    console.log("User Data", user)
+    console.log("After User creation")
+    const { result: student, err: err2 } = await studentService.createStudent({
       college_id: collegeId,
       enrollment_number: studentData.enrollmentNumber,
       registered_roll_number: studentData.registeredRoll,
       session: studentData.session,
       current_year: studentData.currentYear,
       current_semester: studentData.currentSemester,
-      current_roll: classRoll,
-      class_id: classId,
+      current_roll: studentData.classRoll,
+      class_id: studentData.classId,
       student_id: user.user_id,
       stream_id: studentData.streamId
     });
@@ -39,7 +41,7 @@ const createStudent = async (req, res) => {
     const studentId = student.student_id;
     successResponse.message = "Student created successfully";
     successResponse.data = { studentId, ...studentData };
-    return res.status(status.SUCCESS).json(errorResponse);
+    return res.status(status.SUCCESS).json(successResponse);
   } catch (error) {
     errorResponse.error = error
     return res.status(status.SERVER_ERROR).json(errorResponse)
@@ -49,13 +51,16 @@ const createStudent = async (req, res) => {
 // By student
 const studentRegisters = async (req, res) => {
     const studentId = req.studentId
-    const collegId = req.collegId
+    const collegeId = req.collegeId
+    console.log("Started controller",{studentId, collegeId})
     try {
-      const {result: user, err: findError} = await studentService.findUser(studentId)
+      const {result: user, err: findError} = await studentService.findUser({user_id: studentId})
       if(findError) {
         errorResponse.error = err
         return res.status(status.SERVER_ERROR).json(errorResponse)
       }
+      console.log(user);
+      
 
       if(user.isEmailVerified) {
         errorResponse.message = "Email already verified. Please login"
@@ -67,7 +72,7 @@ const studentRegisters = async (req, res) => {
         return res.status(status.BAD_REQUEST).json(errorResponse)
       }
 
-      const {result: college, err: collegeError} = studentService.getCollege(collegId)
+      const {result: college, err: collegeError} = await studentService.getCollege(collegeId)
       if(collegeError) {
         errorResponse.error = err
         return res.status(status.SERVER_ERROR).json(errorResponse)
@@ -78,16 +83,21 @@ const studentRegisters = async (req, res) => {
         role: user.role
       }
       const studentToken = tokens.createRolesToken(payload)
-      const url = `${process.env.CLIENT_URL}?token=${studentToken}&email=${user.email}`
+      const url = `${process.env.CLIENT_URL || "http://localhost:3000"}/auth/verify-role?token=${studentToken}&email=${user.email}`
 
       const subject = `College Logo:${college.college_logo}. We ${college.college_name} invite you to verify your Email`
       const html = `<p>Hello ${user.name} please click the below link: <br/> ${url}</p>`
-
-      const response = await mailtrapEmailSend({to: user.email, url,subject,html})
+      console.log({to: user.email, subject,html});
+      
+      const response = await mailtrapEmailSend({to: user.email, subject,html})
         if(!response){
             errorResponse.message= "Mail sending Unsuccessfull"
             return res.status(500).json(errorResponse)
         }
+
+      successResponse.message = "Please verify Your Email"
+      
+      return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
       errorResponse.error = error
       return res.status(status.SERVER_ERROR).json(errorResponse)

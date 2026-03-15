@@ -11,6 +11,7 @@ const streamRouter = require('./routes/stream');
 const studentRouter = require('./routes/student');
 const teacherRouter = require('./routes/teacher');
 const classRouter = require('./routes/class')
+const subjectRouter = require("./routes/subject")
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -30,6 +31,7 @@ app.use("/stream", streamRouter);
 app.use("/student", studentRouter)
 app.use("/teacher", teacherRouter)
 app.use("/class", classRouter)
+app.use("/subject",subjectRouter)
 
 app.get('/', (req, res) => {
     res.send('Student Management API is running...');

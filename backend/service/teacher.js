@@ -45,7 +45,7 @@ const existingTeacher = async ({registered_batch_number}) => {
 }
 
 const findUser = async (teacherId) => {
-    const query = `SELECT email, name, isEmailVerified, role, user_id
+    const query = `SELECT email, name, is_email_verified, role, user_id
                     FROM users
                     WHERE user_id = $1`
     const value = [teacherId]

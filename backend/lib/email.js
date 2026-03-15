@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const emailResponse = require('../utils/emailResponse');
 
 // mailtrap email send
-const mailtrapEmailSend = async ({to, url, subject, html }) => {
+const mailtrapEmailSend = async ({to,subject, html }) => {
       if (
     !process.env.SMTP_HOST ||
     !process.env.SMTP_USER ||
@@ -36,7 +36,7 @@ const mailtrapEmailSend = async ({to, url, subject, html }) => {
     html,
   });
 
-  console.log("Email Send")
+  console.log("Email Sent")
   return true
 }
 

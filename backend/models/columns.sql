@@ -6,7 +6,7 @@ CREATE TABLE users (
      role roles_entries,
 
      email VARCHAR(255) UNIQUE NOT NULL, 
-     password TEXT NOT NULL,
+     password TEXT NULL,
 
      name VARCHAR(255),
      date_of_birth DATE DEFAULT NULL,

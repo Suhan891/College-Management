@@ -7,5 +7,6 @@ const studentMiddleware = require('../middleware/student')
 const studentController = require('../controllers/student');
 
 router.post('/create', authorization.validateUser, authorization.validateCollegeHead, studentMiddleware.registerStudent, studentController.createStudent)
+router.post("/register", studentMiddleware.studentRegisters, studentController.studentRegisters)
 
 module.exports = router

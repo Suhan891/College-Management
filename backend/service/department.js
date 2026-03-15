@@ -61,6 +61,20 @@ const createDepartment = async ({stream_id, department_name, department_code}) =
     }
 }
 
+const getDepartment = async ({college_id}) => {
+    const query = `SELECT s.*
+                    FROM streams
+                    JOIN coleges clg ON clg.college_id = c.college_id
+                    JOIN streams s ON s.course_id = c.course_id`
+    const value = [college_id]
+        try {
+        const result = await dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+
 module.exports = {
     validStreamExists,
     getCollegeFromStream,

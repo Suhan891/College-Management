@@ -1,14 +1,6 @@
 const dbQuery = require("../db/db");
 const { status } = require("../utils/constants");
-//     enrollment_number INT NOT NULL,
-//     registered_roll_number INT NOT NULL,
-//     session VARCHAR(100),
 
-//     current_year INT,
-//     current_semester INT,
-//     current_roll VARCHAR(5),
-
-//     class_id
 const existingUser = async (email) => {
     const query = `SELECT EXISTS (
                     SELECT 1 
@@ -18,20 +10,48 @@ const existingUser = async (email) => {
     const value = [email]
     try {
         const result = await dbQuery(query, value)
-        return {result, err: null}
+        return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: error}
     }
 }
-const createStudent = async ({ college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, student_id}) => {
+const getStreamFromClass = async ({class_id}) => {
+    const query = `SELECT stream_id
+                    FROM classes
+                    WHERE class_id = $1`
+    const value = [class_id]
+    try {
+        const result = await dbQuery(query, value)
+        return { result: result.rows[0], err: null }
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+const getCollegeFromStream = async ({stream_id}) => {
+    const query = `SELECT c.college_id
+                    FROM courses c
+                    JOIN streams s ON c.course_id = s.course_id
+                    WHERE s.stream_id = $1`
+    const value = [stream_id]
+    try {
+        const result = await dbQuery(query, value)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+         console.log("From Course:",error)
+        return {result: null, err: error}
+    }
+}
+const createStudent = async ({ college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, stream_id, student_id}) => {
     const query = `INSERT INTO students (college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id, stream_id, student_id)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                     RETURNING student_id;`
     const values = [college_id, enrollment_number, registered_roll_number, session, current_year, current_semester, current_roll, class_id,stream_id, student_id]
     try {
         const result = await dbQuery(query, values)
+        console.log("From Student: ", result)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log("From Student: ", error)
         return {result: null, err: error}
     }
 }
@@ -39,31 +59,28 @@ const createStudent = async ({ college_id, enrollment_number, registered_roll_nu
 const existingStudent = async ({enrollment_number, registered_roll_number}) => {
     const query = `SELECT student_id, college_id
                    FROM students
-                   WHERE enrollment_numbe = $1 
+                   WHERE enrollment_number = $1 
                    AND registered_roll_number = $2`
     const values = [enrollment_number, registered_roll_number]
     try {
         const result = await dbQuery(query, values)
-        if(result.rows.length === 0) {
-            errorResponse.message = "You are not authorized to access"
-            return {result: null, err: errorResponse, status: status.NOT_FOUND};
-        }
-        return { result: result.rows[0], err: null, status: null }
+        return { result: result.rows[0], err: null }
     } catch (error) {
-        errorResponse.error = error
-        return {result: null, err: errorResponse, status: status.SERVER_ERROR}
+        return {result: null, err:error}
     }
 }
 
-const findUser = async (studentId) => {
-    const query = `SELECT email, name, isEmailVerified, role, user_id
+const findUser = async ({user_id}) => {
+    const query = `SELECT email, name, is_email_verified, role, user_id
                     FROM users
                     WHERE user_id = $1`
-    const value = [studentId]
+    const value = [user_id]
     try {
         const result = await dbQuery(query, value)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error);
+        
         return {result: result.rows[0], err: null}
     }
 }
@@ -83,7 +100,10 @@ const getCollege = async (collegeId) => {
 
 module.exports = {
     existingUser,
+    getStreamFromClass,
+    getCollegeFromStream,
     createStudent,
+
     existingStudent,
     findUser,
     getCollege

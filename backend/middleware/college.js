@@ -130,50 +130,50 @@ const validateCollegeAdress = async (req, res, next) => {
     next()
 }
 
-const validateCollegeCalender = (req, res, next) => {
-    const {error, value} = validationCollege.registerCalender(req.body)
+const validateCollegeCalender = async (req, res, next) => {
+    const {error, value} = validationCollege.registerCalender.validate(req.body)
     if(error) {
-        errorResponse.message = error.message[0]
+        errorResponse.message = error.details[0].message
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {result: isExistingCalender, err: isExistingCalenderErr} = serviceCollege.existingCalender({college_id: req.collegeId, academic_session: value.academicSession})
+    const {result: isExistingCalender, err: isExistingCalenderErr} = await serviceCollege.existingCalender({college_id: req.collegeId, academic_session: value.academicSession})
     if(isExistingCalenderErr) {
         errorResponse.error = isExistingCalenderErr
         return res.status(status.INTERNAL_SERVER_ERROR).json(errorResponse)
     }
-    if(isExistingCalender) {
+    if(isExistingCalender.exists) {
         errorResponse.message = "Calendar already exists for this college"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
-    req.calenderValue = value
+    req.calenderValue = value    
     next()
 }
 
-const validateCollegeSpecialDate = (req, res, next) => {
+const validateCollegeSpecialDate = async (req, res, next) => {
     const collegeId = req.collegeId
-    const {error, value} = validationCollege.registerSpecialDate(req.body)
+    const {error, value} = validationCollege.registerSpecialDate.validate(req.body)
     if(error) {
         errorResponse.message = error.message[0]
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {result: isExistingSpecialDate, err: isExistingSpecialDateErr} = serviceCollege.existingSpecialDate({calender_id: value.calenderId, specific_date: value.specificDate})
+    const {result: isExistingSpecialDate, err: isExistingSpecialDateErr} = await serviceCollege.existingSpecialDate({calender_id: value.calenderId, specific_date: value.specificDate})
     if(isExistingSpecialDateErr) {
         errorResponse.error = isExistingSpecialDateErr
         return res.status(status.INTERNAL_SERVER_ERROR).json(errorResponse)
     }
-    if(isExistingSpecialDate) {
+    if(isExistingSpecialDate.exists) {
         errorResponse.message = "Special day already created on this date"
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }
 
-    const {result: calenderResult, err: calenderErr} = serviceCollege.calenderExists({calender_id: value.calenderId, college_id: collegeId})
+    const {result: calenderResult, err: calenderErr} = await serviceCollege.calenderExists({calender_id: value.calenderId, college_id: collegeId})
     if(calenderErr) {
         errorResponse.error = calenderErr
         return res.status(status.INTERNAL_SERVER_ERROR).json(errorResponse)
     }
-    if(!calenderResult) {  // As this query will return true or false
+    if(!calenderResult.exists) {  // As this query will return true or false
         errorResponse.message = "Calendar not found for this college. Please create a calendar before adding special dates."
         return res.status(status.BAD_REQUEST).json(errorResponse)
     }

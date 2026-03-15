@@ -1,4 +1,5 @@
 const { createRefreshToken, createAccessToken } = require("../lib/tokens")
+const hashing = require("../lib/hashing")
 const { findCollege, findTeacher, findStudent, createPassword } = require("../service/user")
 const { roles, status } = require("../utils/constants")
 const { errorResponse, successResponse } = require("../utils/response")
@@ -39,7 +40,7 @@ const login = async (req, res) => {
 
             accessData = {college_id: result.college_id, role, userId: result.creator} // access token 
 
-            data = {...result, creator_name: name, role}
+            data = {...result, name, role}
 
         } else if(role === roles.TEACHER) {
             const {result, err, status: stat} = await findTeacher(user_id)
@@ -157,25 +158,33 @@ const logout = (req, res) => {
 }
 
 const emailVerificationRoles = async (req, res) => {
-    const userData = req.userData
+    const userData = req?.userData
+    console.log(userData)
     try {
-        const hashedPassword = createPassword(userData.password)
+        const hashedPassword = await hashing.createPassword(userData.password)
+        console.log(hashedPassword, userData.password)
         const emailVerified = true
-        const {result: emailDone, err} = createPassword({password: hashedPassword, isEmailVerified: emailVerified, date_of_birth: userData.dob})
+        if(!hashedPassword || !userData.password){
+            errorResponse.message = "Password not arising"
+            errorResponse.error = {hashedPassword,password: userData.password}
+            return res.status(500).json(errorResponse)
+        }
+        const {result: emailDone, err} = await createPassword({password: hashedPassword, is_email_verified: emailVerified, date_of_birth: userData.dob, user_id: userData.userData.user_id})
         if(err) {
             errorResponse.error = err
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
-        if(!emailDone) {
+        if(!emailDone || emailDone.length === 0) {
             errorResponse.message = "Email Verification Unsuccessfull"
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 
         successResponse.message = "Email Verification Successfull"
         successResponse.data = {
-            isEmailVerified: emailDone,
+            isEmailVerified: emailDone.is_email_verified,
             dataOfBirth: userData.dob
         }
+        return res.status(status.SUCCESS).json(successResponse)
     } catch (error) {
         errorResponse.error = error
         return res.status(status.SERVER_ERROR).json(errorResponse)

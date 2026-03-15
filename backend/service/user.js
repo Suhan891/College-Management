@@ -23,6 +23,7 @@ const findUser = async (email) => {
     const value = [email]
     try {
         const result = await dbQuery(query, value)
+        console.log(result.rows[0])
         return { result: result.rows[0], err: null }
     } catch (error) {
         errorResponse.error = error
@@ -103,33 +104,39 @@ const findTeacher = async (userId) => {
 }
 
 // During Email verification of respective roles
-const getUser = async (userId) => {
-    const query = `SELECT user_id, roleis_Email_verified
+const getUser = async ({user_id}) => {
+    const query = `SELECT user_id, role, is_email_verified
                     FROM users 
                     WHERE user_id =  $1`;
-    const value = [userId]
+    const value = [user_id]
     try {
         const result = await dbQuery(query, value)
-        if(result.rows.length === 0) {
-            errorResponse.message = "No such User Available"
-            return {result: null, err: errorResponse, status: status.NOT_FOUND};
-        }
-        return { result: result.rows[0], err: null, status: null }
+        console.log(result)
+        return { result: result.rows[0], err: null }
     } catch (error) {
         errorResponse.error = error
-        return {result: null, err: errorResponse, status: status.SERVER_ERROR}
+        console.log(error);
+        
+        return {result: null, err:error}
     }
 }
 
-const createPassword = async ({password, isEmailVerified, date_of_birth}) => {
-    const query = `INSERT INTO users (password, isEmailVerified, date_of_birth)
-                    VALUES ($1, $2, $3)
-                    RETURNING isEmailVerified;`
-    const values = [password, isEmailVerified, dob]
+// UPDATE users
+const createPassword = async ({password, is_email_verified, date_of_birth, user_id}) => {
+    const query = `UPDATE users 
+                    SET password = $1,
+                     is_email_verified= $2,
+                      date_of_birth=$3,
+                      updated_at = CURRENT_TIMESTAMP
+                    WHERE user_id = $4
+                    RETURNING is_email_verified`
+    const values = [password, is_email_verified, date_of_birth, user_id]
+    console.log(values)
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.log(error)
         return {result: null, err: error}
     }
 }

@@ -45,11 +45,11 @@ const getCollegeFromStream = async ({stream_id}) => {
     }
 }
 
-const getCollegeFromAdress = async ({adress_id}) => {
-    const query = `SELECT college_id
+const getAdressFromCollege = async ({college_id}) => {
+    const query = `SELECT address_id
                     FROM address
-                    WHERE address_id = $1`
-    const value = [adress_id]
+                    WHERE college_id = $1`
+    const value = [college_id]
     try {
         const result = await dbQuery(query, value)
         return {result: result.rows[0], err: null}
@@ -76,6 +76,6 @@ module.exports = {
     validStreamExists,
     getCollegeFromStream,
 
-    getCollegeFromAdress,
+    getAdressFromCollege,
     createClass
 }

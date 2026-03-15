@@ -12,12 +12,14 @@ const createCollege = async (req, res) => {
   console.log(college)
 
   try {
+    console.log("From validations: ", user)
     const hashedPassword = hashing.createPassword(user.password);
+    console.log("Password: ",hashedPassword);
+    
     const { result: userResult, err: userErr } = await serviceCollege.createUser({
       name: user.name,
       email: user.email,
       password: hashedPassword,
-      name: user.name,
       role: roles.COLLEGE,
     });
     if (userErr) {
@@ -47,7 +49,7 @@ const createCollege = async (req, res) => {
     });
   
     const to = user.email;
-    const url = `${process.env.BASE_URL}/college/verify-email?token=${token}`;  // For know it is backend base url -> later frontend base url
+    const url = `${process.env.CLIENT_URL || "http://localhost:3000"}/auth/verify-college?token=${token}&email=${user.email}`;  // For know it is backend base url -> later frontend base url
     const subject = "EduTrack - Email Verification";
     const html = `<p>please verify your emal by clicking this link:</p><br/>${url}`;
   
@@ -112,7 +114,6 @@ const verifyEmail = async (req, res) => {  // On email verification
             college_id: collegeId,
              latitude: addressData.latitude,
               longitude: addressData.longitude,
-               location: addressData.location,
                 city: addressData.city,
                  state: addressData.state,
                   country: addressData.country,
@@ -157,14 +158,14 @@ const verifyEmail = async (req, res) => {  // On email verification
 }
 
 const createCalender = async (req, res) => {
-    const calenderValue = req.addressData
+    const calenderValue = req.calenderValue
     const collegeId = req.collegeId
-
+    console.log(calenderValue)
     try {
         const {err, result} = await serviceCollege.createCalender({
             college_id: collegeId,
              academic_session: calenderValue.academicSession,
-              start_date:calenderValue.academicSession,
+              start_date:calenderValue.startDate,
                working_days: calenderValue.workingDays,
                end_date: calenderValue.endDate
             })
@@ -173,7 +174,7 @@ const createCalender = async (req, res) => {
             return res.status(status.SERVER_ERROR).json(errorResponse)
         }
 
-        const calenderId = result.calender_id
+        const calenderId = result.calendar_id
         
         successResponse.message = "New Calender Created"
         successResponse.data = { calenderId, ...calenderValue}
@@ -188,8 +189,9 @@ const createCalender = async (req, res) => {
 const createSpecialDate = async (req, res) => {
     const specialDateData = req.specialDateData
 
+    console.log(specialDateData)
     try {
-        const {err, result} = await serviceCollege.createCalender({
+        const {err, result} = await serviceCollege.createSpecialDate({
             day_exceptions_id: specialDateData.calenderId,
              specific_date: specialDateData.specificDate,
               day_status: specialDateData.dayStatus,

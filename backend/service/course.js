@@ -34,6 +34,19 @@ const createCourse = async ({course_name, course_code, duration_years, total_sem
 
 }
 
+const getCourse = async ({college_id}) => {
+    const query = `SELECT *
+                    FROM courses
+                    WHERE college_id = $1`
+    const value = [college_id]
+        try {
+        const result = await dbQuery(query, values)
+        return {result: result.rows[0], err: null}
+    } catch (error) {
+        return {result: null, err: error}
+    }
+}
+
 module.exports = {
     checkExists,
     createCourse

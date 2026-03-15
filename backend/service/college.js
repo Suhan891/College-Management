@@ -27,10 +27,10 @@ const existingUser = async ({email}) => {
 //     }
 // }
 const createUser = async ({name,email,password,role}) => {
-    const query = `INSERT INTO users(name, email, password,  role, name)
-                    VALUES ($1, $2, $3, $4, $5)
+    const query = `INSERT INTO users(name, email, password,  role)
+                    VALUES ($1, $2, $3, $4)
                     RETURNING user_id`
-    const values = [name, email,password, role, name]
+    const values = [name, email,password, role]
     try {
         const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
@@ -108,11 +108,11 @@ const existingAdress = async ({college_id, latitude, longitude}) => {
         return {result:  null, err: null}
     }
 }
-const createAdress = async ({college_id, latitude, longitude, location, city, state, country, pincode}) => {
-    const query = `INSERT INTO address (college_id, latitude, longitude, location, city, state, country, pincode)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+const createAdress = async ({college_id, latitude, longitude, city, state, country, pincode}) => {
+    const query = `INSERT INTO address (college_id, latitude, longitude,city, state, country, pincode)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
                     RETURNING address_id`
-    const values = [college_id, latitude, longitude, location, city, state, country, pincode]
+    const values = [college_id, latitude, longitude, city, state, country, pincode]
     try {
         const result = await dbQuery(query, values)
         console.log("From Db: ",result)
@@ -124,27 +124,29 @@ const createAdress = async ({college_id, latitude, longitude, location, city, st
 }
 
 // Calender
-const existingCalender = ({college_id, academic_session}) => {
+const existingCalender = async ({college_id, academic_session}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
-                    FROM adress
+                    FROM academic_calendars
                     WHERE college_id = $1
-                    AND academic_session = $2`
+                    AND academic_session = $2)`
     const values = [college_id, academic_session]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
+        console.error(error);
+        
         return {result:  null, err: null}
     }
 }
-const createCalender = ({college_id, academic_session, start_date, working_days, end_date }) => {
-    const query = `INSERT INTO calender (college_id, academic_session, start_date, working_days, end_date )
+const createCalender = async ({college_id, academic_session, start_date, working_days, end_date }) => {
+    const query = `INSERT INTO academic_calendars (college_id, academic_session, start_date, working_days, end_date )
                     VALUES ($1, $2, $3, $4, $5)
-                    RETURNING calender_id`
+                    RETURNING calendar_id`
     const values = [college_id, academic_session, start_date, working_days, end_date ]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)        
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: null}
@@ -152,41 +154,42 @@ const createCalender = ({college_id, academic_session, start_date, working_days,
 }
 
 // Special Date
-const existingSpecialDate = ({calender_id, specific_date}) => {
+const existingSpecialDate = async ({calender_id, specific_date}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
                     FROM calendar_day_exception
                     WHERE day_exceptions_id = $1
-                    AND specific_date = $2`
+                    AND specific_date = $2)`
     const values = [calender_id, specific_date]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result:  null, err: null}
     }
 }
-const calenderExists = ({calender_id, college_id}) => {
+const calenderExists = async ({calender_id, college_id}) => {
     const query = `SELECT EXISTS (
                     SELECT 1
-                    FROM academic_calenders
-                    WHERE calender_id = $1
-                    AND college_id = $2`
+                    FROM academic_calendars
+                    WHERE calendar_id = $1
+                    AND college_id = $2)`
     const values = [calender_id, college_id]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
+        console.log("result:", result)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result:  null, err: null}
     }
 }
-const createSpecialDate = ({day_exceptions_id, specific_date, day_status, reason}) => {
-    const query = `INSERT INTO calender_day_exception (day_exceptions_id, specific_date, day_status, reason)
+const createSpecialDate = async ({day_exceptions_id, specific_date, day_status, reason}) => {
+    const query = `INSERT INTO calendar_day_exception (day_exceptions_id, specific_date, day_status, reason)
                     VALUES ($1, $2, $3, $4)
                     RETURNING day_exceptions_id`
     const values = [day_exceptions_id, specific_date, day_status, reason]
     try {
-        const result = dbQuery(query, values)
+        const result = await dbQuery(query, values)
         return {result: result.rows[0], err: null}
     } catch (error) {
         return {result: null, err: null}
